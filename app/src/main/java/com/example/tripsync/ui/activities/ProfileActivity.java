@@ -4,13 +4,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import androidx.annotation.Nullable;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.tripsync.R;
@@ -22,7 +22,7 @@ public class ProfileActivity extends AppCompatActivity {
     Button btnSelectImage, btnSave;
 
     Uri selectedImageUri = null;
-    private static final int PICK_IMAGE_REQUEST = 200;
+    private ActivityResultLauncher<String[]> imagePickerLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +33,23 @@ public class ProfileActivity extends AppCompatActivity {
         etName = findViewById(R.id.etName);
         btnSelectImage = findViewById(R.id.btnSelectImage);
         btnSave = findViewById(R.id.btnSave);
+
+        imagePickerLauncher = registerForActivityResult(
+                new ActivityResultContracts.OpenDocument(),
+                uri -> {
+                    if (uri == null) {
+                        return;
+                    }
+
+                    getContentResolver().takePersistableUriPermission(
+                            uri,
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    );
+
+                    selectedImageUri = uri;
+                    ivProfile.setImageURI(uri);
+                }
+        );
 
         SharedPreferences prefs = getSharedPreferences("UserProfile", MODE_PRIVATE);
 
@@ -45,11 +62,9 @@ public class ProfileActivity extends AppCompatActivity {
             ivProfile.setImageURI(Uri.parse(savedImage));
         }
 
-        // Select image from gallery
-        btnSelectImage.setOnClickListener(v -> {
-            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-            startActivityForResult(intent, PICK_IMAGE_REQUEST);
-        });
+        // Open the system file picker so emulator and real devices both show a proper image chooser.
+        btnSelectImage.setOnClickListener(v -> imagePickerLauncher.launch(new String[]{"image/*"}));
+        ivProfile.setOnClickListener(v -> imagePickerLauncher.launch(new String[]{"image/*"}));
 
         // Save profile
         btnSave.setOnClickListener(v -> {
@@ -73,18 +88,5 @@ public class ProfileActivity extends AppCompatActivity {
             Toast.makeText(this, "Profile Saved", Toast.LENGTH_SHORT).show();
             finish();
         });
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == PICK_IMAGE_REQUEST
-                && resultCode == RESULT_OK
-                && data != null) {
-
-            selectedImageUri = data.getData();
-            ivProfile.setImageURI(selectedImageUri);
-        }
     }
 }
