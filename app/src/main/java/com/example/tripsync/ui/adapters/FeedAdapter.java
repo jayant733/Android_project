@@ -4,9 +4,8 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewParent;
 import android.widget.ArrayAdapter;
-import android.widget.RatingBar;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -50,24 +49,18 @@ public class FeedAdapter extends ArrayAdapter<FeedPost> {
         TextView title = convertView.findViewById(R.id.tvFeedTitle);
         TextView details = convertView.findViewById(R.id.tvFeedDetails);
         TextView ratingText = convertView.findViewById(R.id.tvFeedRating);
-        RatingBar ratingBar = convertView.findViewById(R.id.ratingBar);
+        ImageView star1 = convertView.findViewById(R.id.star1);
+        ImageView star2 = convertView.findViewById(R.id.star2);
+        ImageView star3 = convertView.findViewById(R.id.star3);
+        ImageView star4 = convertView.findViewById(R.id.star4);
+        ImageView star5 = convertView.findViewById(R.id.star5);
+        ImageView[] stars = new ImageView[]{star1, star2, star3, star4, star5};
 
         FeedPost post = feedPosts.get(position);
         title.setText(post.tripName + "\n" + post.location + "\n" + post.email);
         details.setText(post.details != null && !post.details.isEmpty() ? post.details : "Shared trip post");
         ratingText.setText("Avg Rating: " + String.format(Locale.US, "%.1f", post.averageRating) + " (" + post.ratingCount + ")");
-        ratingBar.setOnRatingBarChangeListener(null);
-        ratingBar.setIsIndicator(false);
-        ratingBar.setClickable(true);
-        ratingBar.setFocusable(true);
-        ratingBar.setRating(post.averageRating);
-        ratingBar.setOnTouchListener((v, event) -> {
-            ViewParent parentView = v.getParent();
-            if (parentView != null) {
-                parentView.requestDisallowInterceptTouchEvent(true);
-            }
-            return false;
-        });
+        renderStars(stars, Math.round(post.averageRating));
 
         if (auth.getCurrentUser() == null) {
             return convertView;
@@ -83,29 +76,41 @@ public class FeedAdapter extends ArrayAdapter<FeedPost> {
             if (snapshot.exists()) {
                 Double userRating = snapshot.getDouble("value");
                 if (userRating != null) {
-                    ratingBar.setRating(userRating.floatValue());
+                    renderStars(stars, userRating.intValue());
                 }
             }
         });
 
-        ratingBar.setOnRatingBarChangeListener((bar, value, fromUser) -> {
-            if (!fromUser || auth.getCurrentUser() == null) {
-                return;
-            }
-
-            Map<String, Object> rating = new HashMap<>();
-            rating.put("value", (double) value);
-            rating.put("userId", currentUserId);
-            rating.put("updatedAt", System.currentTimeMillis());
-
-            userRatingRef.set(rating, SetOptions.merge())
-                    .addOnSuccessListener(unused -> recalculateAverage(post, ratingText))
-                    .addOnFailureListener(e ->
-                            Toast.makeText(context, "Could not save rating", Toast.LENGTH_SHORT).show()
-                    );
-        });
+        for (int i = 0; i < stars.length; i++) {
+            final int selectedRating = i + 1;
+            stars[i].setOnClickListener(v -> saveRating(post, userRatingRef, selectedRating, ratingText, stars));
+        }
 
         return convertView;
+    }
+
+    private void saveRating(FeedPost post,
+                            DocumentReference userRatingRef,
+                            int selectedRating,
+                            TextView ratingText,
+                            ImageView[] stars) {
+        if (auth.getCurrentUser() == null) {
+            return;
+        }
+
+        Map<String, Object> rating = new HashMap<>();
+        rating.put("value", selectedRating);
+        rating.put("userId", auth.getCurrentUser().getUid());
+        rating.put("updatedAt", System.currentTimeMillis());
+
+        userRatingRef.set(rating, SetOptions.merge())
+                .addOnSuccessListener(unused -> {
+                    renderStars(stars, selectedRating);
+                    recalculateAverage(post, ratingText);
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(context, "Could not save rating", Toast.LENGTH_SHORT).show()
+                );
     }
 
     private void recalculateAverage(FeedPost post, TextView ratingText) {
@@ -118,11 +123,16 @@ public class FeedAdapter extends ArrayAdapter<FeedPost> {
                     int count = 0;
 
                     for (com.google.firebase.firestore.DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
-                        Double value = doc.getDouble("value");
+                        Long value = doc.getLong("value");
                         if (value == null) {
-                            continue;
+                            Double valueDouble = doc.getDouble("value");
+                            if (valueDouble == null) {
+                                continue;
+                            }
+                            total += valueDouble;
+                        } else {
+                            total += value;
                         }
-                        total += value;
                         count++;
                     }
 
@@ -139,5 +149,13 @@ public class FeedAdapter extends ArrayAdapter<FeedPost> {
                     ratingText.setText("Avg Rating: " + String.format(Locale.US, "%.1f", average) + " (" + count + ")");
                     Toast.makeText(context, "You have rated successfully", Toast.LENGTH_SHORT).show();
                 });
+    }
+
+    private void renderStars(ImageView[] stars, int rating) {
+        for (int i = 0; i < stars.length; i++) {
+            stars[i].setImageResource(i < rating
+                    ? android.R.drawable.btn_star_big_on
+                    : android.R.drawable.btn_star_big_off);
+        }
     }
 }
