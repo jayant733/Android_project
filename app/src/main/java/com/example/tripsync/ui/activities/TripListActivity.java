@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -13,6 +14,7 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.tripsync.R;
@@ -48,6 +50,7 @@ public class TripListActivity extends AppCompatActivity {
     FirebaseFirestore db;
     FirebaseAuth mAuth;
     String currentTripDocId;
+    boolean isNameDialogShowing;
 
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
 
@@ -92,6 +95,7 @@ public class TripListActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        ensureUserNameAvailable();
         updateUserHeader();
         loadTripsFromCloud();
         setupProfileSection();
@@ -276,6 +280,52 @@ public class TripListActivity extends AppCompatActivity {
         } else {
             tvUserEmail.setText("TripSync User");
         }
+    }
+
+    private void ensureUserNameAvailable() {
+        SharedPreferences profilePrefs = getSharedPreferences("UserProfile", MODE_PRIVATE);
+        String savedName = profilePrefs.getString("user_name", "");
+
+        if (savedName != null && !savedName.trim().isEmpty()) {
+            isNameDialogShowing = false;
+            return;
+        }
+
+        if (isNameDialogShowing) {
+            return;
+        }
+
+        isNameDialogShowing = true;
+
+        EditText input = new EditText(this);
+        input.setHint("Enter your name");
+        input.setTextColor(0xFF111827);
+        input.setHintTextColor(0xFF9CA3AF);
+        input.setPadding(32, 24, 32, 24);
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("What is your name?")
+                .setMessage("Your name will be shown on the home screen and in your profile.")
+                .setView(input)
+                .setCancelable(false)
+                .setPositiveButton("Save", null)
+                .create();
+
+        dialog.setOnDismissListener(d -> isNameDialogShowing = false);
+        dialog.show();
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            String enteredName = input.getText().toString().trim();
+
+            if (enteredName.isEmpty()) {
+                input.setError("Please enter your name");
+                return;
+            }
+
+            profilePrefs.edit().putString("user_name", enteredName).apply();
+            updateUserHeader();
+            Toast.makeText(this, "Welcome, " + enteredName, Toast.LENGTH_SHORT).show();
+            dialog.dismiss();
+        });
     }
 
     private void openTripDetails(String tripDocId) {
