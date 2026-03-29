@@ -151,6 +151,16 @@ public class MyGroupActivity extends AppCompatActivity {
         String tripOwnerUserId = inviteDoc.getString("tripOwnerUserId");
         String tripName = inviteDoc.getString("tripName");
 
+        if (inviteeName == null || inviteeName.isEmpty()) {
+            inviteeName = getSharedPreferences("UserProfile", MODE_PRIVATE)
+                    .getString("user_name", "Group Member");
+        }
+
+        if (tripDocId == null || tripOwnerUserId == null) {
+            Toast.makeText(this, "Invite data is incomplete", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         Map<String, Object> member = new HashMap<>();
         member.put("name", inviteeName);
         member.put("email", inviteeEmail);

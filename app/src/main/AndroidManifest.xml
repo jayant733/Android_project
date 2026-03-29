@@ -68,6 +68,10 @@
             android:exported="false" />
 
         <activity
+            android:name=".ui.activities.MyGroupActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".ui.activities.PastTripsActivity"
             android:exported="false" />
 
