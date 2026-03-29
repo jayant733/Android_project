@@ -10,7 +10,6 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- ================= HEADER CARD ================= -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -23,65 +22,74 @@
             <ImageView
                 android:id="@+id/ivTripImage"
                 android:layout_width="match_parent"
-                android:layout_height="180dp"
+                android:layout_height="190dp"
                 android:scaleType="centerCrop"
                 android:background="#E5E7EB"
-                android:layout_marginBottom="12dp"/>
+                android:layout_marginBottom="12dp" />
+
+            <Button
+                android:id="@+id/btnUpdateTripImage"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:text="Update Trip Cover"
+                android:background="@drawable/bg_outline_button"
+                android:textColor="#6366F1"
+                android:textAllCaps="false"
+                android:layout_marginBottom="14dp" />
 
             <TextView
                 android:id="@+id/tvTripName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:textSize="22sp"
                 android:textStyle="bold"
-                android:textColor="#111827"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:textColor="#111827" />
 
             <TextView
                 android:id="@+id/tvDestination"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:textSize="15sp"
                 android:textColor="#374151"
-                android:layout_marginTop="4dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_marginTop="4dp" />
 
             <TextView
                 android:id="@+id/tvStartDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:textSize="13sp"
                 android:textColor="#6B7280"
-                android:layout_marginTop="2dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_marginTop="2dp" />
 
             <TextView
                 android:id="@+id/tvStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:paddingHorizontal="10dp"
                 android:paddingVertical="4dp"
                 android:textColor="@android:color/white"
                 android:textSize="12sp"
-                android:background="@drawable/bg_status_chip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:background="@drawable/bg_status_chip" />
 
             <TextView
                 android:id="@+id/tvDuration"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
                 android:textSize="13sp"
-                android:textColor="#6B7280"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:textColor="#6B7280" />
 
         </LinearLayout>
 
-        <!-- ================= ITINERARY ================= -->
         <TextView
-            android:text="Itinerary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Trip Notes"
             android:textStyle="bold"
             android:textSize="18sp"
             android:textColor="#111827"
-            android:layout_marginBottom="8dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_marginBottom="8dp" />
 
         <TextView
             android:id="@+id/tvPlan"
@@ -91,17 +99,16 @@
             android:textColor="#374151"
             android:background="@drawable/bg_card"
             android:padding="14dp"
-            android:layout_marginBottom="20dp"/>
+            android:layout_marginBottom="20dp" />
 
-        <!-- ================= BUDGET ================= -->
         <TextView
-            android:text="Trip Budget"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Spending Overview"
             android:textStyle="bold"
             android:textSize="18sp"
             android:textColor="#111827"
-            android:layout_marginBottom="8dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_marginBottom="8dp" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -111,34 +118,42 @@
             android:padding="14dp"
             android:layout_marginBottom="20dp">
 
-            <SeekBar
-                android:id="@+id/seekBudget"
-                android:layout_width="match_parent"
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:max="100"/>
+                android:text="Total Spent"
+                android:textColor="#6B7280"
+                android:textSize="13sp" />
 
             <TextView
-                android:id="@+id/tvBudgetValue"
-                android:text="Budget Level: ₹ 0"
-                android:textSize="14sp"
-                android:textColor="#374151"
-                android:layout_marginTop="8dp"
+                android:id="@+id/tvTotalSpent"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-
-            <ProgressBar
-                android:id="@+id/progressTrip"
-                style="?android:attr/progressBarStyleHorizontal"
-                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:max="100"
-                android:layout_marginTop="10dp"/>
+                android:text="₹0.00"
+                android:textColor="#111827"
+                android:textSize="26sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="10dp" />
+
+            <TextView
+                android:id="@+id/tvExpenseEntries"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0 entries"
+                android:textColor="#374151"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/tvMemberCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0 travelers"
+                android:textColor="#374151"
+                android:textSize="14sp"
+                android:layout_marginTop="4dp" />
 
         </LinearLayout>
 
-        <!-- ================= ACTION BUTTONS ================= -->
-
-        <!-- Row 1 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -149,28 +164,27 @@
             <Button
                 android:id="@+id/btnStartTrip"
                 android:layout_width="0dp"
-                android:layout_weight="1"
                 android:layout_height="48dp"
+                android:layout_weight="1"
                 android:text="Start"
                 android:background="@drawable/bg_primary_button"
                 android:textColor="@android:color/white"
                 android:textAllCaps="false"
-                android:layout_marginEnd="6dp"/>
+                android:layout_marginEnd="6dp" />
 
             <Button
                 android:id="@+id/btnCompleteTrip"
                 android:layout_width="0dp"
-                android:layout_weight="1"
                 android:layout_height="48dp"
+                android:layout_weight="1"
                 android:text="Complete"
                 android:background="@drawable/bg_primary_button"
                 android:textColor="@android:color/white"
                 android:textAllCaps="false"
-                android:layout_marginStart="6dp"/>
+                android:layout_marginStart="6dp" />
 
         </LinearLayout>
 
-        <!-- Row 2 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -181,28 +195,27 @@
             <Button
                 android:id="@+id/btnCollaborators"
                 android:layout_width="0dp"
-                android:layout_weight="1"
                 android:layout_height="48dp"
+                android:layout_weight="1"
                 android:text="Collaborators"
                 android:background="@drawable/bg_primary_button"
                 android:textColor="@android:color/white"
                 android:textAllCaps="false"
-                android:layout_marginEnd="6dp"/>
+                android:layout_marginEnd="6dp" />
 
             <Button
                 android:id="@+id/btnCopyPlan"
                 android:layout_width="0dp"
-                android:layout_weight="1"
                 android:layout_height="48dp"
+                android:layout_weight="1"
                 android:text="Copy Plan"
                 android:background="@drawable/bg_outline_button"
                 android:textColor="#6366F1"
                 android:textAllCaps="false"
-                android:layout_marginStart="6dp"/>
+                android:layout_marginStart="6dp" />
 
         </LinearLayout>
 
-        <!-- Delete (separate for emphasis) -->
         <Button
             android:id="@+id/btnDeleteTrip"
             android:layout_width="match_parent"
@@ -211,7 +224,7 @@
             android:background="@drawable/bg_danger_button"
             android:textColor="@android:color/white"
             android:textAllCaps="false"
-            android:layout_marginBottom="12dp"/>
+            android:layout_marginBottom="12dp" />
 
         <Button
             android:id="@+id/btnBack"
@@ -220,7 +233,7 @@
             android:text="Back"
             android:background="@drawable/bg_outline_button"
             android:textColor="#6366F1"
-            android:textAllCaps="false"/>
+            android:textAllCaps="false" />
 
     </LinearLayout>
 </ScrollView>

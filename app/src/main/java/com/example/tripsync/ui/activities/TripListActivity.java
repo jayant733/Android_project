@@ -72,20 +72,11 @@ public class TripListActivity extends AppCompatActivity {
         updateUserHeader();
         setupProfileSection();
 
-        listTrips.setOnItemClickListener((parent, view, position, id) -> {
-            Intent intent = new Intent(this, TripDetailsActivity.class);
-            intent.putExtra("trip_doc_id", upcomingTripDocIds.get(position));
-            startActivity(intent);
-        });
-
+        listTrips.setOnItemClickListener((parent, view, position, id) -> openTripDetails(upcomingTripDocIds.get(position)));
         currentTripCard.setOnClickListener(v -> {
-            if (currentTripDocId == null) {
-                return;
+            if (currentTripDocId != null) {
+                openTripDetails(currentTripDocId);
             }
-
-            Intent intent = new Intent(this, TripDetailsActivity.class);
-            intent.putExtra("trip_doc_id", currentTripDocId);
-            startActivity(intent);
         });
 
         feedTrips = new ArrayList<>();
@@ -116,7 +107,7 @@ public class TripListActivity extends AppCompatActivity {
             tvCurrentTrip.setText("No Active Trip");
             tvCurrentDestination.setText("Log in to view your trips");
             listTrips.setAdapter(new TripAdapter());
-            tvStats.setText("Upcoming Trips: 0");
+            tvStats.setText("Upcoming Trips: 0 | Past Trips: 0");
             return;
         }
 
@@ -126,16 +117,21 @@ public class TripListActivity extends AppCompatActivity {
                 .orderBy("startDate", Query.Direction.ASCENDING)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
-                    boolean foundCurrent = false;
+                    int pastTripCount = 0;
 
                     for (DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
                         String name = doc.getString("name");
                         String destination = doc.getString("location");
                         String startDateStr = doc.getString("startDate");
+                        String savedStatus = doc.getString("status");
 
                         if (name == null || destination == null || startDateStr == null) {
                             continue;
                         }
+
+                        String status = (savedStatus == null || savedStatus.isEmpty())
+                                ? resolveTripStatus(startDateStr)
+                                : savedStatus;
 
                         try {
                             Date tripDate = sdf.parse(startDateStr);
@@ -143,15 +139,27 @@ public class TripListActivity extends AppCompatActivity {
                                 continue;
                             }
 
-                            int compare = tripDate.compareTo(today);
+                            if ("COMPLETED".equals(status)) {
+                                pastTripCount++;
+                                continue;
+                            }
 
-                            if (compare == 0 && !foundCurrent) {
-                                tvCurrentTrip.setText(name);
-                                tvCurrentDestination.setText(destination + " (Starts Today)");
+                            if ("ONGOING".equals(status)) {
+                                if (currentTripDocId == null) {
+                                    currentTripDocId = doc.getId();
+                                    tvCurrentTrip.setText(name);
+                                    tvCurrentDestination.setText(destination + " (Trip in progress)");
+                                }
+                                continue;
+                            }
+
+                            int compare = tripDate.compareTo(today);
+                            if (compare <= 0 && currentTripDocId == null) {
                                 currentTripDocId = doc.getId();
-                                foundCurrent = true;
-                            } else if (compare > 0) {
-                                long daysRemaining = (tripDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24);
+                                tvCurrentTrip.setText(name);
+                                tvCurrentDestination.setText(destination + " (Starts now)");
+                            } else {
+                                long daysRemaining = Math.max(0, (tripDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
                                 upcomingTrips.add(name + " - " + destination + " (" + daysRemaining + " days remaining)");
                                 upcomingTripDocIds.add(doc.getId());
                             }
@@ -160,14 +168,14 @@ public class TripListActivity extends AppCompatActivity {
                         }
                     }
 
-                    if (!foundCurrent) {
+                    if (currentTripDocId == null) {
                         tvCurrentTrip.setText("No Active Trip");
                         tvCurrentDestination.setText("Start planning today!");
                     }
 
                     adapter = new TripAdapter();
                     listTrips.setAdapter(adapter);
-                    tvStats.setText("Upcoming Trips: " + upcomingTrips.size());
+                    tvStats.setText("Upcoming Trips: " + upcomingTrips.size() + " | Past Trips: " + pastTripCount);
                 })
                 .addOnFailureListener(e ->
                         Toast.makeText(this, "Could not load your trips", Toast.LENGTH_SHORT).show()
@@ -185,6 +193,8 @@ public class TripListActivity extends AppCompatActivity {
             popup.setOnMenuItemClickListener(item -> {
                 if (item.getTitle().equals("Profile")) {
                     startActivity(new Intent(this, ProfileActivity.class));
+                } else if (item.getTitle().equals("Past Trips")) {
+                    startActivity(new Intent(this, PastTripsActivity.class));
                 } else if (item.getTitle().equals("My Group")) {
                     startActivity(new Intent(this, MyGroupActivity.class));
                 } else if (item.getTitle().equals("Logout")) {
@@ -265,6 +275,34 @@ public class TripListActivity extends AppCompatActivity {
             tvUserEmail.setText("Logged in as:\n" + savedEmail);
         } else {
             tvUserEmail.setText("TripSync User");
+        }
+    }
+
+    private void openTripDetails(String tripDocId) {
+        Intent intent = new Intent(this, TripDetailsActivity.class);
+        intent.putExtra("trip_doc_id", tripDocId);
+        startActivity(intent);
+    }
+
+    private String resolveTripStatus(String startDateStr) {
+        try {
+            Date today = getStartOfToday();
+            Date tripDate = sdf.parse(startDateStr);
+
+            if (tripDate == null || today == null) {
+                return "PLANNED";
+            }
+
+            int compare = tripDate.compareTo(today);
+            if (compare > 0) {
+                return "PLANNED";
+            }
+            if (compare == 0) {
+                return "ONGOING";
+            }
+            return "COMPLETED";
+        } catch (Exception e) {
+            return "PLANNED";
         }
     }
 

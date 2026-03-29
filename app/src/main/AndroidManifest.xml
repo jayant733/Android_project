@@ -67,6 +67,10 @@
             android:name=".ui.activities.CollaboratorsActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".ui.activities.PastTripsActivity"
+            android:exported="false" />
+
         <!-- ✅ Content Provider -->
         <provider
             android:name=".data.provider.TripContentProvider"
