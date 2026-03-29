@@ -1,26 +1,33 @@
 package com.example.tripsync.ui.activities;
 
-import android.content.ContentValues;
-import android.database.Cursor;
 import android.os.Bundle;
-import android.widget.*;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.Spinner;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+
 import com.example.tripsync.R;
-import com.example.tripsync.data.db.TripDatabaseHelper;
-import com.example.tripsync.data.provider.TripContentProvider;
-import java.util.*;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
 public class CollaboratorsActivity extends AppCompatActivity {
 
     EditText etMemberName, etMemberEmail;
     EditText etExpenseAmount, etExpenseDesc;
-
     Button btnAddMember, btnAddExpense, btnCalculate;
-
     ListView listMembers, listExpenses;
-
     Spinner spinnerPaidBy;
 
     ArrayList<String> members;
@@ -28,43 +35,45 @@ public class CollaboratorsActivity extends AppCompatActivity {
 
     ArrayAdapter<String> memberAdapter, expenseAdapter;
 
-    long tripId = -1;
+    String tripDocId;
+    FirebaseFirestore db;
+    FirebaseAuth auth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_collaborators);
 
-        tripId = getIntent().getLongExtra("trip_id", -1);
+        tripDocId = getIntent().getStringExtra("trip_doc_id");
+        db = FirebaseFirestore.getInstance();
+        auth = FirebaseAuth.getInstance();
 
         Button btnBackMembers = findViewById(R.id.btnBackMembers);
         etMemberName = findViewById(R.id.etMemberName);
         etMemberEmail = findViewById(R.id.etMemberEmail);
         etExpenseAmount = findViewById(R.id.etExpenseAmount);
         etExpenseDesc = findViewById(R.id.etExpenseDesc);
-
         btnAddMember = findViewById(R.id.btnAddMember);
         btnAddExpense = findViewById(R.id.btnAddExpense);
         btnCalculate = findViewById(R.id.btnCalculateSettlement);
-
-        btnAddMember = findViewById(R.id.btnAddMember);
-
         listMembers = findViewById(R.id.listMembers);
         listExpenses = findViewById(R.id.listExpenses);
-
         spinnerPaidBy = findViewById(R.id.spinnerPaidBy);
 
         members = new ArrayList<>();
         expenses = new ArrayList<>();
 
-        memberAdapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_list_item_1, members);
-
-        expenseAdapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_list_item_1, expenses);
+        memberAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, members);
+        expenseAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, expenses);
 
         listMembers.setAdapter(memberAdapter);
         listExpenses.setAdapter(expenseAdapter);
+
+        if (tripDocId == null || auth.getCurrentUser() == null) {
+            Toast.makeText(this, "Trip not found", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
 
         loadMembers();
         loadExpenses();
@@ -76,185 +85,187 @@ public class CollaboratorsActivity extends AppCompatActivity {
     }
 
     private void addMember() {
-
         String name = etMemberName.getText().toString().trim();
         String email = etMemberEmail.getText().toString().trim();
 
-        if (name.isEmpty() || email.isEmpty()) return;
+        if (name.isEmpty() || email.isEmpty()) {
+            Toast.makeText(this, "Enter member name and email", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        ContentValues values = new ContentValues();
-        values.put(TripDatabaseHelper.COLUMN_TRIP_ID, tripId);
-        values.put(TripDatabaseHelper.COLUMN_COLLAB_NAME, name);
-        values.put(TripDatabaseHelper.COLUMN_COLLAB_EMAIL, email);
+        Map<String, Object> member = new HashMap<>();
+        member.put("name", name);
+        member.put("email", email);
+        member.put("createdAt", System.currentTimeMillis());
 
-        getContentResolver().insert(
-                TripContentProvider.COLLABORATORS_URI,
-                values
-        );
-
-        etMemberName.setText("");
-        etMemberEmail.setText("");
-
-        loadMembers();
+        tripRef()
+                .collection("collaborators")
+                .add(member)
+                .addOnSuccessListener(unused -> {
+                    etMemberName.setText("");
+                    etMemberEmail.setText("");
+                    loadMembers();
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Could not add member", Toast.LENGTH_SHORT).show()
+                );
     }
 
     private void addExpense() {
+        if (spinnerPaidBy.getSelectedItem() == null) {
+            Toast.makeText(this, "Add a member first", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         String paidBy = spinnerPaidBy.getSelectedItem().toString();
-        String amountStr = etExpenseAmount.getText().toString();
-        String desc = etExpenseDesc.getText().toString();
+        String amountStr = etExpenseAmount.getText().toString().trim();
+        String desc = etExpenseDesc.getText().toString().trim();
 
-        if (amountStr.isEmpty()) return;
+        if (amountStr.isEmpty()) {
+            Toast.makeText(this, "Enter an expense amount", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         double amount = Double.parseDouble(amountStr);
 
-        ContentValues values = new ContentValues();
-        values.put(TripDatabaseHelper.COLUMN_EXPENSE_TRIP_ID, tripId);
-        values.put(TripDatabaseHelper.COLUMN_PAID_BY, paidBy);
-        values.put(TripDatabaseHelper.COLUMN_AMOUNT, amount);
-        values.put(TripDatabaseHelper.COLUMN_DESCRIPTION, desc);
+        Map<String, Object> expense = new HashMap<>();
+        expense.put("paidBy", paidBy);
+        expense.put("amount", amount);
+        expense.put("description", desc);
+        expense.put("createdAt", System.currentTimeMillis());
 
-        getContentResolver().insert(
-                TripContentProvider.EXPENSES_URI,
-                values
-        );
-
-        etExpenseAmount.setText("");
-        etExpenseDesc.setText("");
-
-        loadExpenses();
+        tripRef()
+                .collection("expenses")
+                .add(expense)
+                .addOnSuccessListener(unused -> {
+                    etExpenseAmount.setText("");
+                    etExpenseDesc.setText("");
+                    loadExpenses();
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Could not add expense", Toast.LENGTH_SHORT).show()
+                );
     }
 
     private void loadMembers() {
+        tripRef()
+                .collection("collaborators")
+                .orderBy("createdAt", Query.Direction.ASCENDING)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    members.clear();
 
-        members.clear();
+                    for (DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
+                        String name = doc.getString("name");
+                        if (name != null && !name.isEmpty()) {
+                            members.add(name);
+                        }
+                    }
 
-        Cursor cursor = getContentResolver().query(
-                TripContentProvider.COLLABORATORS_URI,
-                null,
-                TripDatabaseHelper.COLUMN_TRIP_ID + "=?",
-                new String[]{String.valueOf(tripId)},
-                null
-        );
+                    memberAdapter.notifyDataSetChanged();
 
-        if (cursor != null) {
-            while (cursor.moveToNext()) {
-
-                String name = cursor.getString(
-                        cursor.getColumnIndexOrThrow(
-                                TripDatabaseHelper.COLUMN_COLLAB_NAME));
-
-                members.add(name);
-            }
-            cursor.close();
-        }
-
-        memberAdapter.notifyDataSetChanged();
-
-        ArrayAdapter<String> spinnerAdapter =
-                new ArrayAdapter<>(this,
-                        android.R.layout.simple_spinner_dropdown_item,
-                        members);
-
-        spinnerPaidBy.setAdapter(spinnerAdapter);
+                    ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(
+                            this,
+                            android.R.layout.simple_spinner_dropdown_item,
+                            members
+                    );
+                    spinnerPaidBy.setAdapter(spinnerAdapter);
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Could not load members", Toast.LENGTH_SHORT).show()
+                );
     }
 
     private void loadExpenses() {
+        tripRef()
+                .collection("expenses")
+                .orderBy("createdAt", Query.Direction.ASCENDING)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    expenses.clear();
 
-        expenses.clear();
+                    for (DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
+                        String paidBy = doc.getString("paidBy");
+                        Double amount = doc.getDouble("amount");
+                        String desc = doc.getString("description");
 
-        Cursor cursor = getContentResolver().query(
-                TripContentProvider.EXPENSES_URI,
-                null,
-                TripDatabaseHelper.COLUMN_EXPENSE_TRIP_ID + "=?",
-                new String[]{String.valueOf(tripId)},
-                null
-        );
+                        expenses.add(
+                                (paidBy != null ? paidBy : "Unknown") +
+                                        " paid ₹" +
+                                        String.format(Locale.US, "%.2f", amount != null ? amount : 0.0) +
+                                        " for " +
+                                        (desc != null ? desc : "")
+                        );
+                    }
 
-        if (cursor != null) {
-            while (cursor.moveToNext()) {
-
-                String paidBy = cursor.getString(
-                        cursor.getColumnIndexOrThrow(
-                                TripDatabaseHelper.COLUMN_PAID_BY));
-
-                double amount = cursor.getDouble(
-                        cursor.getColumnIndexOrThrow(
-                                TripDatabaseHelper.COLUMN_AMOUNT));
-
-                String desc = cursor.getString(
-                        cursor.getColumnIndexOrThrow(
-                                TripDatabaseHelper.COLUMN_DESCRIPTION));
-
-                expenses.add(paidBy + " paid ₹" + amount + " for " + desc);
-            }
-            cursor.close();
-        }
-
-        expenseAdapter.notifyDataSetChanged();
+                    expenseAdapter.notifyDataSetChanged();
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Could not load expenses", Toast.LENGTH_SHORT).show()
+                );
     }
 
     private void calculateSettlement() {
+        tripRef()
+                .collection("expenses")
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    Map<String, Double> paidMap = new HashMap<>();
+                    double total = 0;
 
-        Map<String, Double> paidMap = new HashMap<>();
-        double total = 0;
+                    for (DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
+                        String paidBy = doc.getString("paidBy");
+                        Double amount = doc.getDouble("amount");
 
-        Cursor cursor = getContentResolver().query(
-                TripContentProvider.EXPENSES_URI,
-                null,
-                TripDatabaseHelper.COLUMN_EXPENSE_TRIP_ID + "=?",
-                new String[]{String.valueOf(tripId)},
-                null
-        );
+                        if (paidBy == null || amount == null) {
+                            continue;
+                        }
 
-        if (cursor != null) {
-            while (cursor.moveToNext()) {
+                        total += amount;
+                        paidMap.put(paidBy, paidMap.getOrDefault(paidBy, 0.0) + amount);
+                    }
 
-                String paidBy = cursor.getString(
-                        cursor.getColumnIndexOrThrow(
-                                TripDatabaseHelper.COLUMN_PAID_BY));
+                    int memberCount = members.size();
+                    if (memberCount == 0) {
+                        Toast.makeText(this, "Add members first", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
 
-                double amount = cursor.getDouble(
-                        cursor.getColumnIndexOrThrow(
-                                TripDatabaseHelper.COLUMN_AMOUNT));
+                    double share = total / memberCount;
+                    StringBuilder result = new StringBuilder();
 
-                total += amount;
+                    for (String member : members) {
+                        double paid = paidMap.getOrDefault(member, 0.0);
+                        double balance = paid - share;
 
-                paidMap.put(paidBy,
-                        paidMap.getOrDefault(paidBy, 0.0) + amount);
-            }
-            cursor.close();
-        }
+                        if (balance > 0) {
+                            result.append(member)
+                                    .append(" should receive ₹")
+                                    .append(String.format(Locale.US, "%.2f", balance))
+                                    .append("\n");
+                        } else {
+                            result.append(member)
+                                    .append(" owes ₹")
+                                    .append(String.format(Locale.US, "%.2f", -balance))
+                                    .append("\n");
+                        }
+                    }
 
-        int memberCount = members.size();
-        if (memberCount == 0) return;
+                    new AlertDialog.Builder(this)
+                            .setTitle("Settlement Summary")
+                            .setMessage(result.toString())
+                            .setPositiveButton("OK", null)
+                            .show();
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Could not calculate settlement", Toast.LENGTH_SHORT).show()
+                );
+    }
 
-        double share = total / memberCount;
-
-        StringBuilder result = new StringBuilder();
-
-        for (String member : members) {
-
-            double paid = paidMap.getOrDefault(member, 0.0);
-            double balance = paid - share;
-
-            if (balance > 0) {
-                result.append(member)
-                        .append(" should receive ₹")
-                        .append(String.format("%.2f", balance))
-                        .append("\n");
-            } else {
-                result.append(member)
-                        .append(" owes ₹")
-                        .append(String.format("%.2f", -balance))
-                        .append("\n");
-            }
-        }
-
-        new AlertDialog.Builder(this)
-                .setTitle("Settlement Summary")
-                .setMessage(result.toString())
-                .setPositiveButton("OK", null)
-                .show();
+    private com.google.firebase.firestore.DocumentReference tripRef() {
+        return db.collection("users")
+                .document(auth.getCurrentUser().getUid())
+                .collection("trips")
+                .document(tripDocId);
     }
 }

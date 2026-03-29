@@ -2,26 +2,32 @@ package com.example.tripsync.ui.activities;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.*;
+import android.widget.ArrayAdapter;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.PopupMenu;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.tripsync.R;
-import com.example.tripsync.data.db.TripDatabaseHelper;
-import com.example.tripsync.data.provider.TripContentProvider;
-import com.example.tripsync.service.TripReminderService;
 import com.example.tripsync.ui.adapters.FeedAdapter;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.*;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 
 public class TripListActivity extends AppCompatActivity {
 
@@ -36,12 +42,14 @@ public class TripListActivity extends AppCompatActivity {
     ImageView ivProfileIcon;
 
     ArrayList<String> upcomingTrips;
+    ArrayList<String> upcomingTripDocIds;
     ArrayAdapter<String> adapter;
 
     FirebaseFirestore db;
     FirebaseAuth mAuth;
+    String currentTripDocId;
 
-    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,39 +60,34 @@ public class TripListActivity extends AppCompatActivity {
         listFeed = findViewById(R.id.listFeed);
         fabCreateTrip = findViewById(R.id.fabCreateTrip);
         currentTripCard = findViewById(R.id.currentTripCard);
-
         tvCurrentTrip = findViewById(R.id.tvCurrentTrip);
         tvCurrentDestination = findViewById(R.id.tvCurrentDestination);
         tvStats = findViewById(R.id.tvStats);
-
-        // 🔥 ADD THIS TEXTVIEW IN XML ALSO
         tvUserEmail = findViewById(R.id.tvUserEmail);
-
         ivProfileIcon = findViewById(R.id.ivProfileIcon);
 
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
 
-        // ✅ SHOW LOGGED IN EMAIL
-        if (mAuth.getCurrentUser() != null) {
-            tvUserEmail.setText("Logged in as: " + mAuth.getCurrentUser().getEmail());
-        }
-
+        updateUserHeader();
         setupProfileSection();
 
         listTrips.setOnItemClickListener((parent, view, position, id) -> {
-            String selectedTrip = upcomingTrips.get(position);
-            String tripName = selectedTrip.split(" - ")[0];
-
-            long tripId = getTripIdByName(tripName);
-
             Intent intent = new Intent(this, TripDetailsActivity.class);
-            intent.putExtra("trip_name", tripName);
-            intent.putExtra("trip_id", tripId);
+            intent.putExtra("trip_doc_id", upcomingTripDocIds.get(position));
             startActivity(intent);
         });
 
-        // 🔥 FIREBASE FEED
+        currentTripCard.setOnClickListener(v -> {
+            if (currentTripDocId == null) {
+                return;
+            }
+
+            Intent intent = new Intent(this, TripDetailsActivity.class);
+            intent.putExtra("trip_doc_id", currentTripDocId);
+            startActivity(intent);
+        });
+
         feedTrips = new ArrayList<>();
         feedAdapter = new FeedAdapter(this, feedTrips);
         listFeed.setAdapter(feedAdapter);
@@ -98,100 +101,81 @@ public class TripListActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        loadTripsFromDatabase();
+        updateUserHeader();
+        loadTripsFromCloud();
         setupProfileSection();
     }
 
-    private void loadTripsFromDatabase() {
-
+    private void loadTripsFromCloud() {
         upcomingTrips = new ArrayList<>();
-        boolean foundCurrent = false;
-        Date today = new Date();
+        upcomingTripDocIds = new ArrayList<>();
+        currentTripDocId = null;
+        Date today = getStartOfToday();
 
-        Cursor cursor = getContentResolver().query(
-                TripContentProvider.TRIPS_URI,
-                null,
-                null,
-                null,
-                null
-        );
+        if (mAuth.getCurrentUser() == null) {
+            tvCurrentTrip.setText("No Active Trip");
+            tvCurrentDestination.setText("Log in to view your trips");
+            listTrips.setAdapter(new TripAdapter());
+            tvStats.setText("Upcoming Trips: 0");
+            return;
+        }
 
-        if (cursor != null) {
+        db.collection("users")
+                .document(mAuth.getCurrentUser().getUid())
+                .collection("trips")
+                .orderBy("startDate", Query.Direction.ASCENDING)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    boolean foundCurrent = false;
 
-            while (cursor.moveToNext()) {
+                    for (DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
+                        String name = doc.getString("name");
+                        String destination = doc.getString("location");
+                        String startDateStr = doc.getString("startDate");
 
-                long tripId = cursor.getLong(
-                        cursor.getColumnIndexOrThrow(TripDatabaseHelper.COLUMN_ID));
-
-                String name = cursor.getString(
-                        cursor.getColumnIndexOrThrow(TripDatabaseHelper.COLUMN_NAME));
-
-                String destination = cursor.getString(
-                        cursor.getColumnIndexOrThrow(TripDatabaseHelper.COLUMN_DESTINATION));
-
-                String startDateStr = cursor.getString(
-                        cursor.getColumnIndexOrThrow(TripDatabaseHelper.COLUMN_START_DATE));
-
-                try {
-                    Date tripDate = sdf.parse(startDateStr);
-
-                    long diff = tripDate.getTime() - today.getTime();
-                    long daysRemaining = diff / (1000 * 60 * 60 * 24);
-
-                    if (daysRemaining == 0) {
-
-                        tvCurrentTrip.setText(name);
-                        tvCurrentDestination.setText(destination + " (Starts Today)");
-                        foundCurrent = true;
-
-                        SharedPreferences reminderPrefs =
-                                getSharedPreferences("TripReminderPrefs", MODE_PRIVATE);
-
-                        boolean alreadyTriggered =
-                                reminderPrefs.getBoolean("reminder_sent_" + tripId, false);
-
-                        if (!alreadyTriggered) {
-
-                            Intent intent = new Intent(this, TripReminderService.class);
-                            intent.putExtra("trip_name", name);
-                            startService(intent);
-
-                            reminderPrefs.edit()
-                                    .putBoolean("reminder_sent_" + tripId, true)
-                                    .apply();
+                        if (name == null || destination == null || startDateStr == null) {
+                            continue;
                         }
 
-                    } else if (daysRemaining > 0) {
+                        try {
+                            Date tripDate = sdf.parse(startDateStr);
+                            if (tripDate == null) {
+                                continue;
+                            }
 
-                        upcomingTrips.add(name + " - " + destination +
-                                " (" + daysRemaining + " days remaining)");
+                            int compare = tripDate.compareTo(today);
+
+                            if (compare == 0 && !foundCurrent) {
+                                tvCurrentTrip.setText(name);
+                                tvCurrentDestination.setText(destination + " (Starts Today)");
+                                currentTripDocId = doc.getId();
+                                foundCurrent = true;
+                            } else if (compare > 0) {
+                                long daysRemaining = (tripDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24);
+                                upcomingTrips.add(name + " - " + destination + " (" + daysRemaining + " days remaining)");
+                                upcomingTripDocIds.add(doc.getId());
+                            }
+                        } catch (ParseException e) {
+                            Toast.makeText(this, "Invalid trip date found", Toast.LENGTH_SHORT).show();
+                        }
                     }
 
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-            }
+                    if (!foundCurrent) {
+                        tvCurrentTrip.setText("No Active Trip");
+                        tvCurrentDestination.setText("Start planning today!");
+                    }
 
-            cursor.close();
-        }
-
-        if (!foundCurrent) {
-            tvCurrentTrip.setText("No Active Trip");
-            tvCurrentDestination.setText("Start planning today!");
-        }
-
-        adapter = new TripAdapter();
-        listTrips.setAdapter(adapter);
-
-        tvStats.setText("Upcoming Trips: " + upcomingTrips.size());
+                    adapter = new TripAdapter();
+                    listTrips.setAdapter(adapter);
+                    tvStats.setText("Upcoming Trips: " + upcomingTrips.size());
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Could not load your trips", Toast.LENGTH_SHORT).show()
+                );
     }
 
     private void setupProfileSection() {
-
-        SharedPreferences prefs = getSharedPreferences("UserProfile", MODE_PRIVATE);
-
         ivProfileIcon.setOnClickListener(v -> {
-
             PopupMenu popup = new PopupMenu(this, ivProfileIcon);
             popup.getMenu().add("Profile");
             popup.getMenu().add("Past Trips");
@@ -199,17 +183,13 @@ public class TripListActivity extends AppCompatActivity {
             popup.getMenu().add("Logout");
 
             popup.setOnMenuItemClickListener(item -> {
-
                 if (item.getTitle().equals("Profile")) {
                     startActivity(new Intent(this, ProfileActivity.class));
-
                 } else if (item.getTitle().equals("My Group")) {
                     startActivity(new Intent(this, MyGroupActivity.class));
-
                 } else if (item.getTitle().equals("Logout")) {
-
-                    // 🔥 LOGOUT FIX
                     FirebaseAuth.getInstance().signOut();
+                    getSharedPreferences("SessionPrefs", MODE_PRIVATE).edit().clear().apply();
 
                     Intent intent = new Intent(this, LoginActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -225,44 +205,29 @@ public class TripListActivity extends AppCompatActivity {
         });
     }
 
-    private long getTripIdByName(String tripName) {
-
-        Cursor cursor = getContentResolver().query(
-                TripContentProvider.TRIPS_URI,
-                null,
-                TripDatabaseHelper.COLUMN_NAME + "=?",
-                new String[]{tripName},
-                null
-        );
-
-        long tripId = -1;
-
-        if (cursor != null && cursor.moveToFirst()) {
-            tripId = cursor.getLong(
-                    cursor.getColumnIndexOrThrow(
-                            TripDatabaseHelper.COLUMN_ID));
-            cursor.close();
-        }
-
-        return tripId;
-    }
-
     private void loadFeed() {
-
         db.collection("feed")
                 .orderBy("timestamp", Query.Direction.DESCENDING)
                 .addSnapshotListener((value, error) -> {
-
                     if (error != null) {
                         Toast.makeText(this, "Feed Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
-                    if (value == null) return;
+                    if (value == null) {
+                        return;
+                    }
 
                     feedTrips.clear();
+                    String currentUserId = mAuth.getCurrentUser() != null
+                            ? mAuth.getCurrentUser().getUid()
+                            : null;
 
                     for (DocumentSnapshot doc : value.getDocuments()) {
+                        String ownerUserId = doc.getString("userId");
+                        if (currentUserId != null && currentUserId.equals(ownerUserId)) {
+                            continue;
+                        }
 
                         String name = doc.getString("name");
                         String location = doc.getString("location");
@@ -283,6 +248,34 @@ public class TripListActivity extends AppCompatActivity {
                 });
     }
 
+    private void updateUserHeader() {
+        SharedPreferences sessionPrefs = getSharedPreferences("SessionPrefs", MODE_PRIVATE);
+        SharedPreferences profilePrefs = getSharedPreferences("UserProfile", MODE_PRIVATE);
+
+        String savedName = profilePrefs.getString("user_name", "");
+        String savedEmail = sessionPrefs.getString("user_email", "");
+
+        if ((savedEmail == null || savedEmail.isEmpty()) && mAuth.getCurrentUser() != null) {
+            savedEmail = mAuth.getCurrentUser().getEmail();
+        }
+
+        if (savedName != null && !savedName.isEmpty()) {
+            tvUserEmail.setText(savedName + "\n" + savedEmail);
+        } else if (savedEmail != null && !savedEmail.isEmpty()) {
+            tvUserEmail.setText("Logged in as:\n" + savedEmail);
+        } else {
+            tvUserEmail.setText("TripSync User");
+        }
+    }
+
+    private Date getStartOfToday() {
+        try {
+            return sdf.parse(sdf.format(new Date()));
+        } catch (ParseException e) {
+            return new Date();
+        }
+    }
+
     private class TripAdapter extends ArrayAdapter<String> {
 
         public TripAdapter() {
@@ -291,10 +284,8 @@ public class TripListActivity extends AppCompatActivity {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-
             if (convertView == null) {
-                convertView = getLayoutInflater()
-                        .inflate(R.layout.item_trip, parent, false);
+                convertView = getLayoutInflater().inflate(R.layout.item_trip, parent, false);
             }
 
             TextView name = convertView.findViewById(R.id.tvTripItemName);
@@ -304,17 +295,14 @@ public class TripListActivity extends AppCompatActivity {
             name.setText(item);
 
             menu.setOnClickListener(v -> {
-
                 PopupMenu popup = new PopupMenu(TripListActivity.this, menu);
                 popup.getMenu().add("Share");
 
                 popup.setOnMenuItemClickListener(menuItem -> {
-
                     Intent shareIntent = new Intent(Intent.ACTION_SEND);
                     shareIntent.setType("text/plain");
                     shareIntent.putExtra(Intent.EXTRA_TEXT, item);
                     startActivity(Intent.createChooser(shareIntent, "Share via"));
-
                     return true;
                 });
 
@@ -323,6 +311,5 @@ public class TripListActivity extends AppCompatActivity {
 
             return convertView;
         }
-
     }
 }

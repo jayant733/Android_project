@@ -1,31 +1,25 @@
 package com.example.tripsync.ui.activities;
 
 import android.app.DatePickerDialog;
-import android.content.ContentUris;
-import android.content.ContentValues;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import androidx.annotation.Nullable;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.tripsync.R;
-import com.example.tripsync.data.db.TripDatabaseHelper;
-import com.example.tripsync.data.provider.TripContentProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
-import java.util.HashMap;
-import java.util.Map;
-
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
 public class CreateTripActivity extends AppCompatActivity {
 
@@ -39,7 +33,7 @@ public class CreateTripActivity extends AppCompatActivity {
     FirebaseAuth auth;
 
     Uri selectedImageUri = null;
-    private static final int PICK_IMAGE_REQUEST = 101;
+    private ActivityResultLauncher<String[]> tripImagePickerLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,8 +55,23 @@ public class CreateTripActivity extends AppCompatActivity {
 
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
-        // Date Picker
-        // Date Picker
+        tripImagePickerLauncher = registerForActivityResult(
+                new ActivityResultContracts.OpenDocument(),
+                uri -> {
+                    if (uri == null) {
+                        return;
+                    }
+
+                    getContentResolver().takePersistableUriPermission(
+                            uri,
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    );
+
+                    selectedImageUri = uri;
+                    ivTripImage.setImageURI(uri);
+                }
+        );
+
         etStartDate.setOnClickListener(v -> {
 
             Calendar calendar = Calendar.getInstance();
@@ -84,26 +93,13 @@ public class CreateTripActivity extends AppCompatActivity {
             dialog.show();
         });
 
-        // Select Image
-        btnSelectImage.setOnClickListener(v -> {
-            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-            startActivityForResult(intent, PICK_IMAGE_REQUEST);
-        });
+        btnSelectImage.setOnClickListener(v -> tripImagePickerLauncher.launch(new String[]{"image/*"}));
+        ivTripImage.setOnClickListener(v -> tripImagePickerLauncher.launch(new String[]{"image/*"}));
 
         btnCreateTrip.setOnClickListener(v -> saveTrip(false));
         btnPostTrip.setOnClickListener(v -> saveTrip(true));
 
         btnBack.setOnClickListener(v -> finish());
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
-            selectedImageUri = data.getData();
-            ivTripImage.setImageURI(selectedImageUri);
-        }
     }
 
     private void saveTrip(boolean isPost) {
@@ -119,13 +115,14 @@ public class CreateTripActivity extends AppCompatActivity {
         String location = etLocation.getText().toString().trim();
         String startDate = etStartDate.getText().toString().trim();
 
-        if (name.isEmpty() || location.isEmpty()) {
-            Toast.makeText(this, "Fill required fields", Toast.LENGTH_SHORT).show();
+        if (name.isEmpty() || location.isEmpty() || startDate.isEmpty()) {
+            Toast.makeText(this, "Fill trip name, location, and start date", Toast.LENGTH_SHORT).show();
             return;
         }
 
         String userId = auth.getCurrentUser().getUid();
         String email = auth.getCurrentUser().getEmail();
+        String tripStatus = resolveTripStatus(startDate);
 
         Map<String, Object> trip = new HashMap<>();
         trip.put("name", name);
@@ -133,16 +130,22 @@ public class CreateTripActivity extends AppCompatActivity {
         trip.put("days", days);
         trip.put("location", location);
         trip.put("startDate", startDate);
+        trip.put("status", tripStatus);
         trip.put("userId", userId);
         trip.put("email", email);
+        trip.put("imageUri", selectedImageUri != null ? selectedImageUri.toString() : null);
         trip.put("timestamp", System.currentTimeMillis());
 
-        // ✅ Save to USER
+        createTripInCloud(userId, trip, isPost);
+    }
+
+    private void createTripInCloud(String userId, Map<String, Object> trip, boolean isPost) {
         db.collection("users")
                 .document(userId)
                 .collection("trips")
                 .add(trip)
-                .addOnSuccessListener(doc -> {
+                .addOnSuccessListener(documentReference -> {
+                    trip.put("tripDocId", documentReference.getId());
 
                     if (isPost) {
                         postToFeed(trip);
@@ -150,28 +153,49 @@ public class CreateTripActivity extends AppCompatActivity {
                         Toast.makeText(this, "Trip created", Toast.LENGTH_SHORT).show();
                         navigateBack();
                     }
-
                 })
                 .addOnFailureListener(e ->
-                        Toast.makeText(this, "Error saving trip", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "Could not save trip", Toast.LENGTH_SHORT).show()
                 );
     }
 
-    // 🔥 CLEAN SEPARATION
     private void postToFeed(Map<String, Object> trip) {
 
         db.collection("feed")
                 .add(trip)
                 .addOnSuccessListener(feedDoc -> {
-                    Toast.makeText(this, "Post created and posted", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Trip created and posted to the global feed", Toast.LENGTH_SHORT).show();
                     navigateBack();
                 })
                 .addOnFailureListener(e ->
-                        Toast.makeText(this, "Feed failed", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "Trip created, but feed posting failed", Toast.LENGTH_SHORT).show()
                 );
     }
 
-    // 🔥 PROPER NAVIGATION
+    private String resolveTripStatus(String startDate) {
+        try {
+            java.text.SimpleDateFormat formatter = new java.text.SimpleDateFormat("yyyy-MM-dd", Locale.US);
+            formatter.setLenient(false);
+            java.util.Date today = formatter.parse(formatter.format(new java.util.Date()));
+            java.util.Date tripDate = formatter.parse(startDate);
+
+            if (tripDate == null || today == null) {
+                return "PLANNED";
+            }
+
+            int compare = tripDate.compareTo(today);
+            if (compare > 0) {
+                return "PLANNED";
+            }
+            if (compare == 0) {
+                return "ONGOING";
+            }
+            return "COMPLETED";
+        } catch (Exception e) {
+            return "PLANNED";
+        }
+    }
+
     private void navigateBack() {
         Intent intent = new Intent(this, TripListActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

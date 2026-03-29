@@ -2,8 +2,10 @@ package com.example.tripsync.ui.activities;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -11,9 +13,14 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.tripsync.R;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 public class ProfileActivity extends AppCompatActivity {
 
@@ -23,6 +30,7 @@ public class ProfileActivity extends AppCompatActivity {
 
     Uri selectedImageUri = null;
     private ActivityResultLauncher<String[]> imagePickerLauncher;
+    private ActivityResultLauncher<Void> cameraLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +58,23 @@ public class ProfileActivity extends AppCompatActivity {
                     ivProfile.setImageURI(uri);
                 }
         );
+        cameraLauncher = registerForActivityResult(
+                new ActivityResultContracts.TakePicturePreview(),
+                bitmap -> {
+                    if (bitmap == null) {
+                        return;
+                    }
+
+                    Uri photoUri = saveBitmapToAppStorage(bitmap);
+                    if (photoUri == null) {
+                        Toast.makeText(this, "Could not save captured photo", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    selectedImageUri = photoUri;
+                    ivProfile.setImageURI(photoUri);
+                }
+        );
 
         SharedPreferences prefs = getSharedPreferences("UserProfile", MODE_PRIVATE);
 
@@ -59,12 +84,12 @@ public class ProfileActivity extends AppCompatActivity {
         // Load saved image
         String savedImage = prefs.getString("profile_image", null);
         if (savedImage != null) {
-            ivProfile.setImageURI(Uri.parse(savedImage));
+            selectedImageUri = Uri.parse(savedImage);
+            ivProfile.setImageURI(selectedImageUri);
         }
 
-        // Open the system file picker so emulator and real devices both show a proper image chooser.
-        btnSelectImage.setOnClickListener(v -> imagePickerLauncher.launch(new String[]{"image/*"}));
-        ivProfile.setOnClickListener(v -> imagePickerLauncher.launch(new String[]{"image/*"}));
+        btnSelectImage.setOnClickListener(v -> showPhotoOptions());
+        ivProfile.setOnClickListener(v -> showPhotoOptions());
 
         // Save profile
         btnSave.setOnClickListener(v -> {
@@ -88,5 +113,37 @@ public class ProfileActivity extends AppCompatActivity {
             Toast.makeText(this, "Profile Saved", Toast.LENGTH_SHORT).show();
             finish();
         });
+    }
+
+    private void showPhotoOptions() {
+        String[] options = {"Take Photo", "Choose From Device"};
+
+        new AlertDialog.Builder(this)
+                .setTitle("Update Profile Photo")
+                .setItems(options, (dialog, which) -> {
+                    if (which == 0) {
+                        cameraLauncher.launch(null);
+                    } else {
+                        imagePickerLauncher.launch(new String[]{"image/*"});
+                    }
+                })
+                .show();
+    }
+
+    private Uri saveBitmapToAppStorage(Bitmap bitmap) {
+        File directory = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "profile");
+        if (!directory.exists() && !directory.mkdirs()) {
+            return null;
+        }
+
+        File imageFile = new File(directory, "profile_" + System.currentTimeMillis() + ".jpg");
+
+        try (FileOutputStream outputStream = new FileOutputStream(imageFile)) {
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
+            outputStream.flush();
+            return Uri.fromFile(imageFile);
+        } catch (IOException e) {
+            return null;
+        }
     }
 }

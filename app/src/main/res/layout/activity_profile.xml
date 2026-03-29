@@ -31,7 +31,7 @@
             android:id="@+id/btnSelectImage"
             android:layout_width="match_parent"
             android:layout_height="48dp"
-            android:text="Choose From Device"
+            android:text="Update Profile Photo"
             android:background="@drawable/bg_outline_button"
             android:textColor="#6366F1"
             android:textAllCaps="false"

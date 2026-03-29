@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 public class TripDatabaseHelper extends SQLiteOpenHelper {
+    public static final String COLUMN_OWNER_USER_ID = "owner_user_id";
 
     public static final String TABLE_EXPENSES = "expenses";
     public static final String COLUMN_EXPENSE_ID = "_id";
@@ -13,7 +14,7 @@ public class TripDatabaseHelper extends SQLiteOpenHelper {
     public static final String COLUMN_AMOUNT = "amount";
 
     public static final String DATABASE_NAME = "trips.db";
-    public static final int DATABASE_VERSION = 5;   // 🔥 increase version
+    public static final int DATABASE_VERSION = 6;
 
     // ===== TRIPS TABLE =====
     public static final String TABLE_TRIPS = "trips";
@@ -46,7 +47,8 @@ public class TripDatabaseHelper extends SQLiteOpenHelper {
                 COLUMN_NAME + " TEXT, " +
                 COLUMN_DESTINATION + " TEXT, " +
                 COLUMN_STATUS + " TEXT DEFAULT 'PLANNED', " +
-                COLUMN_START_DATE + " TEXT)");
+                COLUMN_START_DATE + " TEXT, " +
+                COLUMN_OWNER_USER_ID + " TEXT)");
 
         db.execSQL("CREATE TABLE " + TABLE_ITINERARY + " (" +
                 COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -70,11 +72,9 @@ public class TripDatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_TRIPS);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_ITINERARY);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_COLLABORATORS);
-
-        onCreate(db);
+        if (oldVersion < 6) {
+            db.execSQL("ALTER TABLE " + TABLE_TRIPS +
+                    " ADD COLUMN " + COLUMN_OWNER_USER_ID + " TEXT");
+        }
     }
 }

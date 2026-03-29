@@ -2,19 +2,13 @@ package com.example.tripsync.ui.activities;
 
 import android.content.ClipData;
 import android.content.ClipboardManager;
-import android.content.ContentValues;
-import android.content.Intent;
-import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,60 +16,56 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.tripsync.R;
-import com.example.tripsync.data.db.TripDatabaseHelper;
-import com.example.tripsync.data.provider.TripContentProvider;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class TripDetailsActivity extends AppCompatActivity {
     ImageView ivTripImage;
     TextView tvDestination, tvStartDate;
     TextView tvTripName, tvPlan, tvStatus, tvDuration, tvBudgetValue;
     Button btnBack, btnCollaborators, btnStartTrip, btnCompleteTrip,
-            btnShareTrip, btnCopyPlan, btnDeleteTrip;
+            btnCopyPlan, btnDeleteTrip;
     SeekBar seekBudget;
-    Switch switchNotifications;
     ProgressBar progressTrip;
 
-    long tripId = -1;
+    String tripDocId;
+    FirebaseFirestore db;
+    FirebaseAuth auth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_trip_details);
 
-
-        // Initialize Views
         tvTripName = findViewById(R.id.tvTripName);
         tvPlan = findViewById(R.id.tvPlan);
         tvStatus = findViewById(R.id.tvStatus);
         tvDuration = findViewById(R.id.tvDuration);
         tvBudgetValue = findViewById(R.id.tvBudgetValue);
-
         btnBack = findViewById(R.id.btnBack);
         btnCollaborators = findViewById(R.id.btnCollaborators);
         btnStartTrip = findViewById(R.id.btnStartTrip);
         btnCompleteTrip = findViewById(R.id.btnCompleteTrip);
-
         btnCopyPlan = findViewById(R.id.btnCopyPlan);
         btnDeleteTrip = findViewById(R.id.btnDeleteTrip);
-
         ivTripImage = findViewById(R.id.ivTripImage);
         tvDestination = findViewById(R.id.tvDestination);
         tvStartDate = findViewById(R.id.tvStartDate);
         seekBudget = findViewById(R.id.seekBudget);
-
         progressTrip = findViewById(R.id.progressTrip);
 
-        // Receive data
-        String tripName = getIntent().getStringExtra("trip_name");
-        tripId = getIntent().getLongExtra("trip_id", -1);
+        db = FirebaseFirestore.getInstance();
+        auth = FirebaseAuth.getInstance();
+        tripDocId = getIntent().getStringExtra("trip_doc_id");
 
-        if (tripName == null) tripName = "Trip Details";
-        tvTripName.setText(tripName);
+        tvPlan.setText("No trip details added yet.");
 
-        loadItineraryFromDatabase();
         loadTripMetaData();
 
-        // Budget Slider
         seekBudget.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -83,220 +73,173 @@ public class TripDetailsActivity extends AppCompatActivity {
                 tvBudgetValue.setText("Budget Level: ₹ " + (progress * 1000));
             }
 
-            @Override public void onStartTrackingTouch(SeekBar seekBar) {}
-            @Override public void onStopTrackingTouch(SeekBar seekBar) {}
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) { }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) { }
         });
 
-        // Notifications
-
-        // Start Trip
         btnStartTrip.setOnClickListener(v -> updateTripStatus("ONGOING"));
-
-        // Complete Trip
         btnCompleteTrip.setOnClickListener(v -> updateTripStatus("COMPLETED"));
 
-        // Share Trip
-
-
-        // Copy Itinerary
         btnCopyPlan.setOnClickListener(v -> {
-            ClipboardManager clipboard =
-                    (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-
-            ClipData clip = ClipData.newPlainText(
-                    "Trip Itinerary",
-                    tvPlan.getText().toString());
-
+            ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+            ClipData clip = ClipData.newPlainText("Trip Details", tvPlan.getText().toString());
             clipboard.setPrimaryClip(clip);
-            Toast.makeText(this, "Itinerary Copied", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Trip details copied", Toast.LENGTH_SHORT).show();
         });
 
-        // Delete Trip (with confirmation)
         btnDeleteTrip.setOnClickListener(v -> {
             new AlertDialog.Builder(this)
                     .setTitle("Delete Trip")
                     .setMessage("Are you sure you want to delete this trip?")
-                    .setPositiveButton("Yes", (dialog, which) -> {
-                        getContentResolver().delete(
-                                TripContentProvider.TRIPS_URI,
-                                TripDatabaseHelper.COLUMN_ID + "=?",
-                                new String[]{String.valueOf(tripId)}
-                        );
-                        Toast.makeText(this, "Trip Deleted", Toast.LENGTH_SHORT).show();
-                        finish();
-                    })
+                    .setPositiveButton("Yes", (dialog, which) -> deleteTrip())
                     .setNegativeButton("Cancel", null)
                     .show();
         });
 
-        // Collaborators
         btnCollaborators.setOnClickListener(v -> {
-            Intent intent = new Intent(this, CollaboratorsActivity.class);
-            intent.putExtra("trip_id", tripId);
+            if (tripDocId == null) {
+                Toast.makeText(this, "Trip not found", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            android.content.Intent intent = new android.content.Intent(this, CollaboratorsActivity.class);
+            intent.putExtra("trip_doc_id", tripDocId);
             startActivity(intent);
         });
 
         btnBack.setOnClickListener(v -> finish());
     }
 
-    private void loadItineraryFromDatabase() {
-
-        if (tripId == -1) {
-            tvPlan.setText("No itinerary available.");
+    private void loadTripMetaData() {
+        if (tripDocId == null || auth.getCurrentUser() == null) {
+            Toast.makeText(this, "Trip not found", Toast.LENGTH_SHORT).show();
+            finish();
             return;
         }
 
-        Cursor cursor = getContentResolver().query(
-                TripContentProvider.ITINERARY_URI,
-                null,
-                TripDatabaseHelper.COLUMN_TRIP_ID + "=?",
-                new String[]{String.valueOf(tripId)},
-                TripDatabaseHelper.COLUMN_DAY_NUMBER + " ASC"
-        );
+        db.collection("users")
+                .document(auth.getCurrentUser().getUid())
+                .collection("trips")
+                .document(tripDocId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (!documentSnapshot.exists()) {
+                        Toast.makeText(this, "Trip not found", Toast.LENGTH_SHORT).show();
+                        finish();
+                        return;
+                    }
 
-        StringBuilder itineraryBuilder = new StringBuilder();
+                    String tripName = documentSnapshot.getString("name");
+                    String destination = documentSnapshot.getString("location");
+                    String startDateStr = documentSnapshot.getString("startDate");
+                    String details = documentSnapshot.getString("details");
+                    String days = documentSnapshot.getString("days");
+                    String imageUri = documentSnapshot.getString("imageUri");
+                    String status = resolveTripStatus(startDateStr);
 
-        if (cursor != null && cursor.moveToFirst()) {
-            do {
-                int day = cursor.getInt(
-                        cursor.getColumnIndexOrThrow(
-                                TripDatabaseHelper.COLUMN_DAY_NUMBER));
+                    tvTripName.setText(tripName != null ? tripName : "Trip Details");
+                    tvDestination.setText("Destination: " + (destination != null ? destination : "Unknown"));
+                    tvStartDate.setText("Start Date: " + (startDateStr != null ? startDateStr : "Unknown"));
+                    tvPlan.setText(details != null && !details.isEmpty() ? details : "No trip details added yet.");
+                    tvDuration.setText("Duration: " + ((days != null && !days.isEmpty()) ? days : "0") + " Days");
 
-                String description = cursor.getString(
-                        cursor.getColumnIndexOrThrow(
-                                TripDatabaseHelper.COLUMN_DESCRIPTION));
+                    if (imageUri != null && !imageUri.isEmpty()) {
+                        ivTripImage.setImageURI(Uri.parse(imageUri));
+                    }
 
-                itineraryBuilder.append(description)
-                        .append("\n\n");
-
-            } while (cursor.moveToNext());
-
-            cursor.close();
-            tvPlan.setText(itineraryBuilder.toString());
-
-        } else {
-            tvPlan.setText("No itinerary added yet.");
-        }
-    }
-
-    private void loadTripMetaData() {
-
-        if (tripId == -1) return;
-
-        Cursor cursor = getContentResolver().query(
-                TripContentProvider.TRIPS_URI,
-                null,
-                TripDatabaseHelper.COLUMN_ID + "=?",
-                new String[]{String.valueOf(tripId)},
-                null
-        );
-
-        if (cursor == null || !cursor.moveToFirst()) return;
-
-        String destination = cursor.getString(
-                cursor.getColumnIndexOrThrow(
-                        TripDatabaseHelper.COLUMN_DESTINATION));
-
-        String startDateStr = cursor.getString(
-                cursor.getColumnIndexOrThrow(
-                        TripDatabaseHelper.COLUMN_START_DATE));
-
-        String status = cursor.getString(
-                cursor.getColumnIndexOrThrow(
-                        TripDatabaseHelper.COLUMN_STATUS));
-
-        cursor.close();
-
-        tvDestination.setText("Destination: " + destination);
-        tvStartDate.setText("Start Date: " + startDateStr);
-
-        // 🔥 AUTO STATUS BASED ON DATE
-        try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            Date today = new Date();
-            Date tripDate = sdf.parse(startDateStr);
-
-            // Remove time difference effect
-            long diff = tripDate.getTime() - today.getTime();
-            long daysDiff = diff / (1000 * 60 * 60 * 24);
-
-            if (daysDiff > 0) {
-                status = "PLANNED";
-                progressTrip.setProgress(10);
-
-                if (btnStartTrip != null) btnStartTrip.setVisibility(View.GONE);
-                if (btnCompleteTrip != null) btnCompleteTrip.setVisibility(View.GONE);
-
-            } else if (daysDiff == 0) {
-                status = "ONGOING";
-                progressTrip.setProgress(50);
-
-                if (btnStartTrip != null) btnStartTrip.setVisibility(View.GONE);
-                if (btnCompleteTrip != null) btnCompleteTrip.setVisibility(View.VISIBLE);
-
-            } else {
-                status = "COMPLETED";
-                progressTrip.setProgress(100);
-
-                if (btnStartTrip != null) btnStartTrip.setVisibility(View.GONE);
-                if (btnCompleteTrip != null) btnCompleteTrip.setVisibility(View.GONE);
-            }
-
-            // 🔥 Update DB automatically
-            ContentValues values = new ContentValues();
-            values.put(TripDatabaseHelper.COLUMN_STATUS, status);
-
-            getContentResolver().update(
-                    TripContentProvider.TRIPS_URI,
-                    values,
-                    TripDatabaseHelper.COLUMN_ID + "=?",
-                    new String[]{String.valueOf(tripId)}
-            );
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        tvStatus.setText(status);
-
-        if ("ONGOING".equals(status)) {
-            tvStatus.setBackgroundColor(0xFF10B981);
-        } else if ("COMPLETED".equals(status)) {
-            tvStatus.setBackgroundColor(0xFF3B82F6);
-        } else {
-            tvStatus.setBackgroundColor(0xFFF59E0B);
-        }
-
-        // 🔥 Duration
-        Cursor itineraryCursor = getContentResolver().query(
-                TripContentProvider.ITINERARY_URI,
-                null,
-                TripDatabaseHelper.COLUMN_TRIP_ID + "=?",
-                new String[]{String.valueOf(tripId)},
-                null
-        );
-
-        int days = 0;
-        if (itineraryCursor != null) {
-            days = itineraryCursor.getCount();
-            itineraryCursor.close();
-        }
-
-        tvDuration.setText("Duration: " + days + " Days");
+                    applyStatusUi(status);
+                    updateRemoteStatus(status);
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Could not load trip", Toast.LENGTH_SHORT).show()
+                );
     }
 
     private void updateTripStatus(String newStatus) {
+        if (tripDocId == null || auth.getCurrentUser() == null) {
+            return;
+        }
 
-        ContentValues values = new ContentValues();
-        values.put(TripDatabaseHelper.COLUMN_STATUS, newStatus);
+        updateRemoteStatus(newStatus);
+        applyStatusUi(newStatus);
+        Toast.makeText(this, "Trip status updated", Toast.LENGTH_SHORT).show();
+    }
 
-        getContentResolver().update(
-                TripContentProvider.TRIPS_URI,
-                values,
-                TripDatabaseHelper.COLUMN_ID + "=?",
-                new String[]{String.valueOf(tripId)}
-        );
+    private void updateRemoteStatus(String status) {
+        if (tripDocId == null || auth.getCurrentUser() == null) {
+            return;
+        }
 
-        loadTripMetaData();
+        db.collection("users")
+                .document(auth.getCurrentUser().getUid())
+                .collection("trips")
+                .document(tripDocId)
+                .update("status", status);
+    }
+
+    private void deleteTrip() {
+        if (tripDocId == null || auth.getCurrentUser() == null) {
+            return;
+        }
+
+        db.collection("users")
+                .document(auth.getCurrentUser().getUid())
+                .collection("trips")
+                .document(tripDocId)
+                .delete()
+                .addOnSuccessListener(unused -> {
+                    Toast.makeText(this, "Trip Deleted", Toast.LENGTH_SHORT).show();
+                    finish();
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Could not delete trip", Toast.LENGTH_SHORT).show()
+                );
+    }
+
+    private String resolveTripStatus(String startDateStr) {
+        try {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+            Date today = formatter.parse(formatter.format(new Date()));
+            Date tripDate = formatter.parse(startDateStr);
+
+            if (tripDate == null || today == null) {
+                return "PLANNED";
+            }
+
+            int compare = tripDate.compareTo(today);
+            if (compare > 0) {
+                return "PLANNED";
+            }
+            if (compare == 0) {
+                return "ONGOING";
+            }
+            return "COMPLETED";
+        } catch (Exception e) {
+            return "PLANNED";
+        }
+    }
+
+    private void applyStatusUi(String status) {
+        tvStatus.setText(status);
+
+        if ("ONGOING".equals(status)) {
+            progressTrip.setProgress(50);
+            tvStatus.setBackgroundColor(0xFF10B981);
+            btnStartTrip.setVisibility(View.GONE);
+            btnCompleteTrip.setVisibility(View.VISIBLE);
+        } else if ("COMPLETED".equals(status)) {
+            progressTrip.setProgress(100);
+            tvStatus.setBackgroundColor(0xFF3B82F6);
+            btnStartTrip.setVisibility(View.GONE);
+            btnCompleteTrip.setVisibility(View.GONE);
+        } else {
+            progressTrip.setProgress(10);
+            tvStatus.setBackgroundColor(0xFFF59E0B);
+            btnStartTrip.setVisibility(View.VISIBLE);
+            btnCompleteTrip.setVisibility(View.GONE);
+        }
     }
 }

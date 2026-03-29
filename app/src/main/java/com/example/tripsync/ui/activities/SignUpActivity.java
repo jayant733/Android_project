@@ -1,6 +1,7 @@
 package com.example.tripsync.ui.activities;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
@@ -38,6 +39,8 @@ public class SignUpActivity extends AppCompatActivity {
 
             mAuth.createUserWithEmailAndPassword(email, password)
                     .addOnSuccessListener(authResult -> {
+                        SharedPreferences prefs = getSharedPreferences("SessionPrefs", MODE_PRIVATE);
+                        prefs.edit().putString("user_email", email).apply();
                         Toast.makeText(this, "Signup Successful", Toast.LENGTH_SHORT).show();
                         startActivity(new Intent(this, TripListActivity.class));
                         finish();
