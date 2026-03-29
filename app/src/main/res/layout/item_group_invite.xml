@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="#FFFFFF"
+    android:padding="14dp"
+    android:layout_marginBottom="10dp">
+
+    <TextView
+        android:id="@+id/tvInviteGroupName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Goa Crew"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#111827" />
+
+    <TextView
+        android:id="@+id/tvInviteTripName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Goa Trip"
+        android:textColor="#374151"
+        android:layout_marginTop="4dp" />
+
+    <TextView
+        android:id="@+id/tvInviteFrom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="From: friend@email.com"
+        android:textColor="#6B7280"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="10dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="2">
+
+        <Button
+            android:id="@+id/btnAcceptInvite"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_weight="1"
+            android:text="Accept"
+            android:textAllCaps="false"
+            android:background="@drawable/bg_primary_button"
+            android:textColor="@android:color/white"
+            android:layout_marginEnd="6dp" />
+
+        <Button
+            android:id="@+id/btnRejectInvite"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_weight="1"
+            android:text="Decline"
+            android:textAllCaps="false"
+            android:background="@drawable/bg_outline_button"
+            android:textColor="#6366F1"
+            android:layout_marginStart="6dp" />
+
+    </LinearLayout>
+</LinearLayout>

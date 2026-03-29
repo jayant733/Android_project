@@ -197,18 +197,18 @@
                 android:layout_width="0dp"
                 android:layout_height="48dp"
                 android:layout_weight="1"
-                android:text="Collaborators"
+                android:text="Trip Group"
                 android:background="@drawable/bg_primary_button"
                 android:textColor="@android:color/white"
                 android:textAllCaps="false"
                 android:layout_marginEnd="6dp" />
 
             <Button
-                android:id="@+id/btnCopyPlan"
+                android:id="@+id/btnMyGroups"
                 android:layout_width="0dp"
                 android:layout_height="48dp"
                 android:layout_weight="1"
-                android:text="Copy Plan"
+                android:text="My Groups"
                 android:background="@drawable/bg_outline_button"
                 android:textColor="#6366F1"
                 android:textAllCaps="false"

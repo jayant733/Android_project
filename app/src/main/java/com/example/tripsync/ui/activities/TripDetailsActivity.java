@@ -30,7 +30,7 @@ public class TripDetailsActivity extends AppCompatActivity {
     TextView tvTripName, tvPlan, tvStatus, tvDuration;
     TextView tvTotalSpent, tvExpenseEntries, tvMemberCount;
     Button btnBack, btnCollaborators, btnStartTrip, btnCompleteTrip,
-            btnCopyPlan, btnDeleteTrip, btnUpdateTripImage;
+            btnMyGroups, btnDeleteTrip, btnUpdateTripImage;
 
     String tripDocId;
     FirebaseFirestore db;
@@ -56,7 +56,7 @@ public class TripDetailsActivity extends AppCompatActivity {
         btnCollaborators = findViewById(R.id.btnCollaborators);
         btnStartTrip = findViewById(R.id.btnStartTrip);
         btnCompleteTrip = findViewById(R.id.btnCompleteTrip);
-        btnCopyPlan = findViewById(R.id.btnCopyPlan);
+        btnMyGroups = findViewById(R.id.btnMyGroups);
         btnDeleteTrip = findViewById(R.id.btnDeleteTrip);
         btnUpdateTripImage = findViewById(R.id.btnUpdateTripImage);
         ivTripImage = findViewById(R.id.ivTripImage);
@@ -107,12 +107,9 @@ public class TripDetailsActivity extends AppCompatActivity {
         btnStartTrip.setOnClickListener(v -> updateTripStatus("ONGOING"));
         btnCompleteTrip.setOnClickListener(v -> updateTripStatus("COMPLETED"));
 
-        btnCopyPlan.setOnClickListener(v -> {
-            ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-            ClipData clip = ClipData.newPlainText("Trip Details", tvPlan.getText().toString());
-            clipboard.setPrimaryClip(clip);
-            Toast.makeText(this, "Trip details copied", Toast.LENGTH_SHORT).show();
-        });
+        btnMyGroups.setOnClickListener(v ->
+                startActivity(new Intent(this, MyGroupActivity.class))
+        );
 
         btnDeleteTrip.setOnClickListener(v -> {
             new AlertDialog.Builder(this)
@@ -131,6 +128,7 @@ public class TripDetailsActivity extends AppCompatActivity {
 
             Intent intent = new Intent(this, CollaboratorsActivity.class);
             intent.putExtra("trip_doc_id", tripDocId);
+            intent.putExtra("trip_owner_user_id", auth.getCurrentUser() != null ? auth.getCurrentUser().getUid() : "");
             startActivity(intent);
         });
 
@@ -199,11 +197,18 @@ public class TripDetailsActivity extends AppCompatActivity {
         }
 
         tripRef()
-                .collection("collaborators")
+                .collection("groupMembers")
                 .get()
                 .addOnSuccessListener(memberSnapshot ->
-                        tvMemberCount.setText(memberSnapshot.size() + " travelers")
-                );
+                        {
+                            int acceptedCount = 0;
+                            for (com.google.firebase.firestore.DocumentSnapshot doc : memberSnapshot.getDocuments()) {
+                                if ("ACCEPTED".equals(doc.getString("status"))) {
+                                    acceptedCount++;
+                                }
+                            }
+                            tvMemberCount.setText(acceptedCount + " travelers");
+                        });
 
         tripRef()
                 .collection("expenses")
