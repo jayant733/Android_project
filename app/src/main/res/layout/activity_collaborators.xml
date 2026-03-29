@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:text="Trip Group and Expenses"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <!-- Member Section -->
+        <EditText
+            android:id="@+id/etMemberName"
+            android:hint="Member Name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <EditText
+            android:id="@+id/etMemberEmail"
+            android:hint="Member Email"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"/>
+
+        <Button
+            android:id="@+id/btnAddMember"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="Add Member"
+            android:layout_marginTop="8dp"/>
+
+        <ListView
+            android:id="@+id/listMembers"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:layout_marginTop="8dp"/>
+
+        <!-- Expense Section -->
+        <Spinner
+            android:id="@+id/spinnerPaidBy"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"/>
+
+        <EditText
+            android:id="@+id/etExpenseAmount"
+            android:hint="Expense Amount"
+            android:inputType="numberDecimal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"/>
+
+        <EditText
+            android:id="@+id/etExpenseDesc"
+            android:hint="Expense Description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"/>
+
+        <Button
+            android:id="@+id/btnAddExpense"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="Add Expense"
+            android:layout_marginTop="8dp"/>
+
+        <ListView
+            android:id="@+id/listExpenses"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:layout_marginTop="8dp"/>
+
+        <Button
+            android:id="@+id/btnCalculateSettlement"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="Calculate Settlement"
+            android:layout_marginTop="8dp"/>
+
+        <Button
+            android:id="@+id/btnBackMembers"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="Back"
+            android:background="@drawable/bg_outline_button"
+            android:textColor="#6366F1"
+            android:layout_marginTop="20dp"/>
+
+    </LinearLayout>
+</ScrollView>

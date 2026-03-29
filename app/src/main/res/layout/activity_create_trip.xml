@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="20dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:text="Create Trip"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <ImageView
+            android:id="@+id/ivTripImage"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:scaleType="centerCrop"
+            android:background="#E5E7EB"
+            android:layout_marginBottom="10dp"/>
+
+        <Button
+            android:id="@+id/btnSelectImage"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="Select Trip Cover Image"
+            android:background="@drawable/bg_outline_button"
+            android:textColor="#6366F1"
+            android:textAllCaps="false"
+            android:layout_marginBottom="16dp"/>
+
+        <EditText
+            android:id="@+id/etTripName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Trip Name"
+            android:padding="14dp"/>
+
+        <EditText
+            android:id="@+id/etTripDetails"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Trip Details"
+            android:minLines="3"
+            android:gravity="top"
+            android:layout_marginTop="12dp"
+            android:padding="14dp"/>
+
+        <EditText
+            android:id="@+id/etTripDays"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Number of Days"
+            android:inputType="number"
+            android:layout_marginTop="12dp"
+            android:padding="14dp"/>
+
+        <EditText
+            android:id="@+id/etLocation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Location"
+            android:layout_marginTop="12dp"
+            android:padding="14dp"/>
+
+        <EditText
+            android:id="@+id/etStartDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Start Date"
+            android:focusable="false"
+            android:layout_marginTop="12dp"
+            android:padding="14dp"/>
+
+        <Button
+            android:id="@+id/btnCreateTrip"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="Create"
+            android:background="@drawable/bg_primary_button"
+            android:textColor="@android:color/white"
+            android:textAllCaps="false"
+            android:layout_marginTop="20dp"/>
+
+        <Button
+            android:id="@+id/btnPostTrip"
+            android:text="Create and  Post"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"/>
+
+
+        <Button
+            android:id="@+id/btnBack"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="Back"
+            android:background="@drawable/bg_outline_button"
+            android:textColor="#6366F1"
+            android:textAllCaps="false"
+            android:layout_marginTop="12dp"/>
+
+    </LinearLayout>
+</ScrollView>
