@@ -3,27 +3,29 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="14dp"
-    android:background="#FFFFFF">
+    android:background="@drawable/bg_card">
 
     <LinearLayout
-        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_toStartOf="@id/ivMenu">
+        android:layout_toStartOf="@id/ivMenu"
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/tvTripItemName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="15sp"
+            android:textSize="16sp"
             android:textStyle="bold"
-            android:textColor="#111827"/>
+            android:textColor="#111827" />
 
         <TextView
             android:id="@+id/tvTripItemDestination"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#6B7280"/>
+            android:textColor="#6B7280"
+            android:textSize="13sp"
+            android:layout_marginTop="6dp" />
     </LinearLayout>
 
     <ImageView
@@ -31,7 +33,8 @@
         android:layout_width="28dp"
         android:layout_height="28dp"
         android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
         android:src="@android:drawable/ic_menu_more"
-        android:tint="#6B7280"/>
+        android:tint="#6B7280" />
 
 </RelativeLayout>

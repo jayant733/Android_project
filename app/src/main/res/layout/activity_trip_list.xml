@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F3F4F6">
+    android:background="#EEF2F7">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -12,147 +12,156 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- HEADER -->
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/bg_card"
+            android:elevation="4dp"
+            android:padding="16dp"
             android:layout_marginBottom="16dp">
 
             <LinearLayout
-                android:orientation="vertical"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
 
                 <TextView
-                    android:text="TripSync"
-                    android:textSize="26sp"
-                    android:textStyle="bold"
-                    android:textColor="#111827"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content"
+                    android:text="TripSync"
+                    android:textSize="28sp"
+                    android:textStyle="bold"
+                    android:textColor="#111827" />
 
                 <TextView
+                    android:id="@+id/tvUserEmail"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Traveler"
+                    android:textSize="14sp"
+                    android:textColor="#374151"
+                    android:layout_marginTop="6dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:text="Plan smarter. Travel better."
                     android:textColor="#6B7280"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-            </LinearLayout>
+                    android:textSize="13sp"
+                    android:layout_marginTop="2dp" />
 
-            <TextView
-                android:id="@+id/tvUserEmail"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Logged in as:"
-                android:textStyle="bold"
-                android:padding="8dp"/>
+            </LinearLayout>
 
             <ImageView
                 android:id="@+id/ivProfileIcon"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
                 android:clickable="true"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_alignParentEnd="true"
+                android:focusable="true"
                 android:scaleType="centerCrop"
                 android:background="@drawable/bg_circle_profile"
                 android:elevation="4dp"
-                android:padding="2dp"/>
-        </RelativeLayout>
+                android:padding="2dp" />
 
-        <!-- CURRENT TRIP -->
+        </LinearLayout>
+
         <TextView
-            android:text="📍 Current Trip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Current Trip"
             android:textStyle="bold"
             android:textSize="18sp"
-            android:layout_marginBottom="6dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:textColor="#111827"
+            android:layout_marginBottom="8dp" />
 
         <LinearLayout
             android:id="@+id/currentTripCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#FFFFFF"
+            android:background="@drawable/bg_card"
             android:padding="16dp"
             android:orientation="vertical"
-            android:elevation="6dp"
+            android:elevation="4dp"
             android:layout_marginBottom="16dp"
             android:clickable="true"
             android:foreground="?attr/selectableItemBackground">
 
             <TextView
                 android:id="@+id/tvCurrentTrip"
-                android:textSize="16sp"
-                android:textStyle="bold"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#111827" />
 
             <TextView
                 android:id="@+id/tvCurrentDestination"
-                android:textColor="#6B7280"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:textColor="#6B7280"
+                android:textSize="14sp"
+                android:layout_marginTop="6dp" />
         </LinearLayout>
 
-        <!-- UPCOMING TRIPS -->
-        <TextView
-            android:text="🗓 Upcoming Trips"
-            android:textStyle="bold"
-            android:textSize="18sp"
-            android:layout_marginBottom="6dp"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Upcoming Trips"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:textColor="#111827" />
+
+            <TextView
+                android:id="@+id/tvStats"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Upcoming Trips: 0 | Past Trips: 0"
+                android:textColor="#6B7280"
+                android:textSize="12sp" />
+        </LinearLayout>
 
         <ListView
             android:id="@+id/listTrips"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:dividerHeight="6dp"
-            android:background="#FFFFFF"/>
-
-        <!-- PUBLIC FEED SECTION -->
+            android:divider="@android:color/transparent"
+            android:dividerHeight="8dp"
+            android:background="@android:color/transparent"
+            android:clipToPadding="false"
+            android:paddingBottom="4dp" />
 
         <TextView
-            android:text="🌍 Travel Feed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Travel Feed"
             android:textStyle="bold"
             android:textSize="18sp"
-            android:layout_marginTop="20dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:textColor="#111827"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp" />
 
         <ListView
             android:id="@+id/listFeed"
             android:layout_width="match_parent"
-            android:layout_height="250dp"
-            android:layout_marginTop="8dp"/>
+            android:layout_height="180dp"
+            android:divider="@android:color/transparent"
+            android:dividerHeight="8dp"
+            android:background="@android:color/transparent"
+            android:clipToPadding="false"
+            android:paddingBottom="6dp" />
 
-
-        <!-- STATS -->
-        <TextView
-            android:text="📊 Trip Statistics"
-            android:textStyle="bold"
-            android:textSize="16sp"
-            android:layout_marginTop="12dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-
-        <TextView
-            android:id="@+id/tvStats"
-            android:textColor="#374151"
-            android:layout_marginTop="4dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Made and implemented by Jayant Sharma • 23BIT0090"
-            android:textSize="12sp"
-            android:textColor="#9CA3AF"
-            android:gravity="center"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="8dp"/>
     </LinearLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -162,6 +171,6 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="20dp"
         app:srcCompat="@android:drawable/ic_input_add"
-        app:backgroundTint="#6366F1"/>
+        app:backgroundTint="#6366F1" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

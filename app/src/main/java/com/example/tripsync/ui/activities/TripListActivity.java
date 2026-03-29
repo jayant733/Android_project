@@ -377,10 +377,16 @@ public class TripListActivity extends AppCompatActivity {
             }
 
             TextView name = convertView.findViewById(R.id.tvTripItemName);
+            TextView destination = convertView.findViewById(R.id.tvTripItemDestination);
             ImageView menu = convertView.findViewById(R.id.ivMenu);
 
             String item = upcomingTrips.get(position);
-            name.setText(item);
+            String[] primarySplit = item.split(" - ", 2);
+            String tripName = primarySplit.length > 0 ? primarySplit[0] : item;
+            String meta = primarySplit.length > 1 ? primarySplit[1] : "";
+
+            name.setText(tripName);
+            destination.setText(meta);
 
             menu.setOnClickListener(v -> {
                 PopupMenu popup = new PopupMenu(TripListActivity.this, menu);
