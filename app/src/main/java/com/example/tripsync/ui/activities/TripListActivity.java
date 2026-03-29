@@ -34,7 +34,7 @@ import java.util.Locale;
 public class TripListActivity extends AppCompatActivity {
 
     ListView listTrips, listFeed;
-    ArrayList<String> feedTrips;
+    ArrayList<com.example.tripsync.data.model.FeedPost> feedTrips;
     FeedAdapter feedAdapter;
 
     FloatingActionButton fabCreateTrip;
@@ -245,16 +245,26 @@ public class TripListActivity extends AppCompatActivity {
 
                         String name = doc.getString("name");
                         String location = doc.getString("location");
+                        String details = doc.getString("details");
                         String email = doc.getString("email");
+                        Double averageRating = doc.getDouble("averageRating");
+                        Long ratingCount = doc.getLong("ratingCount");
 
                         if (name == null) name = "Unknown Trip";
                         if (location == null) location = "Unknown Location";
                         if (email == null) email = "Unknown User";
 
                         feedTrips.add(
-                                "📍 " + name +
-                                        "\n📌 " + location +
-                                        "\n👤 " + email
+                                new com.example.tripsync.data.model.FeedPost(
+                                        doc.getId(),
+                                        name,
+                                        location,
+                                        details != null ? details : "",
+                                        email,
+                                        ownerUserId != null ? ownerUserId : "",
+                                        averageRating != null ? averageRating.floatValue() : 0f,
+                                        ratingCount != null ? ratingCount.intValue() : 0
+                                )
                         );
                     }
 
@@ -266,12 +276,13 @@ public class TripListActivity extends AppCompatActivity {
         SharedPreferences sessionPrefs = getSharedPreferences("SessionPrefs", MODE_PRIVATE);
         SharedPreferences profilePrefs = getSharedPreferences("UserProfile", MODE_PRIVATE);
 
-        String savedName = profilePrefs.getString("user_name", "");
         String savedEmail = sessionPrefs.getString("user_email", "");
 
         if ((savedEmail == null || savedEmail.isEmpty()) && mAuth.getCurrentUser() != null) {
             savedEmail = mAuth.getCurrentUser().getEmail();
         }
+
+        String savedName = profilePrefs.getString(buildProfileKey(savedEmail) + "_name", "");
 
         if (savedName != null && !savedName.isEmpty()) {
             tvUserEmail.setText(savedName + "\n" + savedEmail);
@@ -284,7 +295,9 @@ public class TripListActivity extends AppCompatActivity {
 
     private void ensureUserNameAvailable() {
         SharedPreferences profilePrefs = getSharedPreferences("UserProfile", MODE_PRIVATE);
-        String savedName = profilePrefs.getString("user_name", "");
+        String currentEmail = getSharedPreferences("SessionPrefs", MODE_PRIVATE)
+                .getString("user_email", mAuth.getCurrentUser() != null ? mAuth.getCurrentUser().getEmail() : "");
+        String savedName = profilePrefs.getString(buildProfileKey(currentEmail) + "_name", "");
 
         if (savedName != null && !savedName.trim().isEmpty()) {
             isNameDialogShowing = false;
@@ -321,11 +334,18 @@ public class TripListActivity extends AppCompatActivity {
                 return;
             }
 
-            profilePrefs.edit().putString("user_name", enteredName).apply();
+            profilePrefs.edit().putString(buildProfileKey(currentEmail) + "_name", enteredName).apply();
             updateUserHeader();
             Toast.makeText(this, "Welcome, " + enteredName, Toast.LENGTH_SHORT).show();
             dialog.dismiss();
         });
+    }
+
+    private String buildProfileKey(String email) {
+        if (email == null || email.trim().isEmpty()) {
+            return "default_profile";
+        }
+        return email.trim().toLowerCase(Locale.US).replace(".", "_");
     }
 
     private void openTripDetails(String tripDocId) {

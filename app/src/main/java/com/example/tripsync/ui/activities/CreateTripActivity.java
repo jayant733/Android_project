@@ -135,6 +135,8 @@ public class CreateTripActivity extends AppCompatActivity {
         trip.put("email", email);
         trip.put("imageUri", selectedImageUri != null ? selectedImageUri.toString() : null);
         trip.put("timestamp", System.currentTimeMillis());
+        trip.put("averageRating", 0.0);
+        trip.put("ratingCount", 0);
 
         createTripInCloud(userId, trip, isPost);
     }

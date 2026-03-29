@@ -17,10 +17,12 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.tripsync.R;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Locale;
 
 public class ProfileActivity extends AppCompatActivity {
 
@@ -31,6 +33,7 @@ public class ProfileActivity extends AppCompatActivity {
     Uri selectedImageUri = null;
     private ActivityResultLauncher<String[]> imagePickerLauncher;
     private ActivityResultLauncher<Void> cameraLauncher;
+    private String currentEmailKey;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +44,9 @@ public class ProfileActivity extends AppCompatActivity {
         etName = findViewById(R.id.etName);
         btnSelectImage = findViewById(R.id.btnSelectImage);
         btnSave = findViewById(R.id.btnSave);
+        currentEmailKey = buildProfileKey(FirebaseAuth.getInstance().getCurrentUser() != null
+                ? FirebaseAuth.getInstance().getCurrentUser().getEmail()
+                : null);
 
         imagePickerLauncher = registerForActivityResult(
                 new ActivityResultContracts.OpenDocument(),
@@ -78,11 +84,9 @@ public class ProfileActivity extends AppCompatActivity {
 
         SharedPreferences prefs = getSharedPreferences("UserProfile", MODE_PRIVATE);
 
-        // Load saved name
-        etName.setText(prefs.getString("user_name", ""));
+        etName.setText(prefs.getString(currentEmailKey + "_name", ""));
 
-        // Load saved image
-        String savedImage = prefs.getString("profile_image", null);
+        String savedImage = prefs.getString(currentEmailKey + "_image", null);
         if (savedImage != null) {
             selectedImageUri = Uri.parse(savedImage);
             ivProfile.setImageURI(selectedImageUri);
@@ -102,10 +106,10 @@ public class ProfileActivity extends AppCompatActivity {
             }
 
             SharedPreferences.Editor editor = prefs.edit();
-            editor.putString("user_name", name);
+            editor.putString(currentEmailKey + "_name", name);
 
             if (selectedImageUri != null) {
-                editor.putString("profile_image", selectedImageUri.toString());
+                editor.putString(currentEmailKey + "_image", selectedImageUri.toString());
             }
 
             editor.apply();
@@ -113,6 +117,13 @@ public class ProfileActivity extends AppCompatActivity {
             Toast.makeText(this, "Profile Saved", Toast.LENGTH_SHORT).show();
             finish();
         });
+    }
+
+    private String buildProfileKey(String email) {
+        if (email == null || email.trim().isEmpty()) {
+            return "default_profile";
+        }
+        return email.trim().toLowerCase(Locale.US).replace(".", "_");
     }
 
     private void showPhotoOptions() {
