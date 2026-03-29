@@ -9,6 +9,8 @@ public class FeedPost {
     public final String userId;
     public final float averageRating;
     public final int ratingCount;
+    public final boolean hasUserRated;
+    public final long timestamp;
 
     public FeedPost(String docId,
                     String tripName,
@@ -17,7 +19,9 @@ public class FeedPost {
                     String email,
                     String userId,
                     float averageRating,
-                    int ratingCount) {
+                    int ratingCount,
+                    boolean hasUserRated,
+                    long timestamp) {
         this.docId = docId;
         this.tripName = tripName;
         this.location = location;
@@ -26,5 +30,7 @@ public class FeedPost {
         this.userId = userId;
         this.averageRating = averageRating;
         this.ratingCount = ratingCount;
+        this.hasUserRated = hasUserRated;
+        this.timestamp = timestamp;
     }
 }

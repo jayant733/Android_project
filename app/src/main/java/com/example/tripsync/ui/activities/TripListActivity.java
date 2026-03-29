@@ -28,6 +28,7 @@ import com.google.firebase.firestore.Query;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Locale;
 
@@ -236,40 +237,94 @@ public class TripListActivity extends AppCompatActivity {
                     String currentUserId = mAuth.getCurrentUser() != null
                             ? mAuth.getCurrentUser().getUid()
                             : null;
+                    ArrayList<DocumentSnapshot> visibleDocs = new ArrayList<>();
 
                     for (DocumentSnapshot doc : value.getDocuments()) {
                         String ownerUserId = doc.getString("userId");
                         if (currentUserId != null && currentUserId.equals(ownerUserId)) {
                             continue;
                         }
-
-                        String name = doc.getString("name");
-                        String location = doc.getString("location");
-                        String details = doc.getString("details");
-                        String email = doc.getString("email");
-                        Double averageRating = doc.getDouble("averageRating");
-                        Long ratingCount = doc.getLong("ratingCount");
-
-                        if (name == null) name = "Unknown Trip";
-                        if (location == null) location = "Unknown Location";
-                        if (email == null) email = "Unknown User";
-
-                        feedTrips.add(
-                                new com.example.tripsync.data.model.FeedPost(
-                                        doc.getId(),
-                                        name,
-                                        location,
-                                        details != null ? details : "",
-                                        email,
-                                        ownerUserId != null ? ownerUserId : "",
-                                        averageRating != null ? averageRating.floatValue() : 0f,
-                                        ratingCount != null ? ratingCount.intValue() : 0
-                                )
-                        );
+                        visibleDocs.add(doc);
                     }
 
-                    feedAdapter.notifyDataSetChanged();
+                    if (visibleDocs.isEmpty()) {
+                        feedAdapter.notifyDataSetChanged();
+                        return;
+                    }
+
+                    if (currentUserId == null) {
+                        for (DocumentSnapshot doc : visibleDocs) {
+                            feedTrips.add(buildFeedPost(doc, false));
+                        }
+                        sortFeedTrips();
+                        feedAdapter.notifyDataSetChanged();
+                        return;
+                    }
+
+                    final int[] pending = {visibleDocs.size()};
+                    for (DocumentSnapshot doc : visibleDocs) {
+                        db.collection("feed")
+                                .document(doc.getId())
+                                .collection("ratings")
+                                .document(currentUserId)
+                                .get()
+                                .addOnSuccessListener(ratingDoc -> {
+                                    feedTrips.add(buildFeedPost(doc, ratingDoc.exists()));
+                                    pending[0]--;
+                                    if (pending[0] == 0) {
+                                        sortFeedTrips();
+                                        feedAdapter.notifyDataSetChanged();
+                                    }
+                                })
+                                .addOnFailureListener(fetchError -> {
+                                    feedTrips.add(buildFeedPost(doc, false));
+                                    pending[0]--;
+                                    if (pending[0] == 0) {
+                                        sortFeedTrips();
+                                        feedAdapter.notifyDataSetChanged();
+                                    }
+                                });
+                    }
                 });
+    }
+
+    private com.example.tripsync.data.model.FeedPost buildFeedPost(DocumentSnapshot doc, boolean hasUserRated) {
+        String ownerUserId = doc.getString("userId");
+        String name = doc.getString("name");
+        String location = doc.getString("location");
+        String details = doc.getString("details");
+        String email = doc.getString("email");
+        Double averageRating = doc.getDouble("averageRating");
+        Long ratingCount = doc.getLong("ratingCount");
+        Long timestamp = doc.getLong("timestamp");
+
+        if (name == null) name = "Unknown Trip";
+        if (location == null) location = "Unknown Location";
+        if (email == null) email = "Unknown User";
+
+        return new com.example.tripsync.data.model.FeedPost(
+                doc.getId(),
+                name,
+                location,
+                details != null ? details : "",
+                email,
+                ownerUserId != null ? ownerUserId : "",
+                averageRating != null ? averageRating.floatValue() : 0f,
+                ratingCount != null ? ratingCount.intValue() : 0,
+                hasUserRated,
+                timestamp != null ? timestamp : 0L
+        );
+    }
+
+    private void sortFeedTrips() {
+        feedTrips.sort((first, second) -> {
+            if (first.hasUserRated != second.hasUserRated) {
+                return first.hasUserRated ? 1 : -1;
+            }
+            return Comparator.comparingLong((com.example.tripsync.data.model.FeedPost post) -> post.timestamp)
+                    .reversed()
+                    .compare(first, second);
+        });
     }
 
     private void updateUserHeader() {
