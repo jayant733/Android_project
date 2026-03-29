@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.ArrayAdapter;
 import android.widget.RatingBar;
 import android.widget.TextView;
@@ -56,7 +57,17 @@ public class FeedAdapter extends ArrayAdapter<FeedPost> {
         details.setText(post.details != null && !post.details.isEmpty() ? post.details : "Shared trip post");
         ratingText.setText("Avg Rating: " + String.format(Locale.US, "%.1f", post.averageRating) + " (" + post.ratingCount + ")");
         ratingBar.setOnRatingBarChangeListener(null);
+        ratingBar.setIsIndicator(false);
+        ratingBar.setClickable(true);
+        ratingBar.setFocusable(true);
         ratingBar.setRating(post.averageRating);
+        ratingBar.setOnTouchListener((v, event) -> {
+            ViewParent parentView = v.getParent();
+            if (parentView != null) {
+                parentView.requestDisallowInterceptTouchEvent(true);
+            }
+            return false;
+        });
 
         if (auth.getCurrentUser() == null) {
             return convertView;
