@@ -182,7 +182,6 @@ public class CollaboratorsActivity extends AppCompatActivity {
             return;
         }
 
-        String ownerEmail = auth.getCurrentUser() != null ? auth.getCurrentUser().getEmail() : null;
         String ownerName = LocalUserStore.getProfileName(this, ownerEmail, "Trip Owner");
 
         Map<String, Object> member = new HashMap<>();
