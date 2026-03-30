@@ -9,7 +9,6 @@
         <item name="colorSecondary">@color/brand_secondary</item>
         <item name="colorTertiary">@color/brand_accent</item>
         <item name="colorSurface">@color/surface_base</item>
-        <item name="colorBackground">@color/surface_base</item>
         <item name="android:colorBackground">@color/surface_base</item>
         <item name="colorOnPrimary">@color/text_on_brand</item>
         <item name="colorOnSurface">@color/text_primary</item>
