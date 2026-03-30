@@ -1,15 +1,13 @@
 package com.example.tripsync.ui.activities;
 
-
-
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.tripsync.R;
 import com.example.tripsync.ui.common.EdgeToEdgeHelper;
+import com.example.tripsync.ui.common.LocalUserStore;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class LoginActivity extends AppCompatActivity {
@@ -74,7 +72,6 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void saveSession(String email) {
-        SharedPreferences prefs = getSharedPreferences("SessionPrefs", MODE_PRIVATE);
-        prefs.edit().putString("user_email", email).apply();
+        LocalUserStore.saveSessionEmail(this, email);
     }
 }

@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.tripsync.R;
 import com.example.tripsync.ui.common.EdgeToEdgeHelper;
+import com.example.tripsync.ui.common.LocalUserStore;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -154,8 +155,8 @@ public class MyGroupActivity extends AppCompatActivity {
         String tripName = inviteDoc.getString("tripName");
 
         if (inviteeName == null || inviteeName.isEmpty()) {
-            inviteeName = getSharedPreferences("UserProfile", MODE_PRIVATE)
-                    .getString("user_name", "Group Member");
+            inviteeName = LocalUserStore.getProfileName(this, auth.getCurrentUser() != null
+                    ? auth.getCurrentUser().getEmail() : null, "Group Member");
         }
 
         if (tripDocId == null || tripOwnerUserId == null) {

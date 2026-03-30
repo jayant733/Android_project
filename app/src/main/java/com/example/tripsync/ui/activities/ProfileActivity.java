@@ -1,7 +1,6 @@
 package com.example.tripsync.ui.activities;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -18,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.tripsync.R;
 import com.example.tripsync.ui.common.EdgeToEdgeHelper;
+import com.example.tripsync.ui.common.LocalUserStore;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.io.File;
@@ -34,7 +34,7 @@ public class ProfileActivity extends AppCompatActivity {
     Uri selectedImageUri = null;
     private ActivityResultLauncher<String[]> imagePickerLauncher;
     private ActivityResultLauncher<Void> cameraLauncher;
-    private String currentEmailKey;
+    private String currentEmail;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,9 +46,9 @@ public class ProfileActivity extends AppCompatActivity {
         etName = findViewById(R.id.etName);
         btnSelectImage = findViewById(R.id.btnSelectImage);
         btnSave = findViewById(R.id.btnSave);
-        currentEmailKey = buildProfileKey(FirebaseAuth.getInstance().getCurrentUser() != null
+        currentEmail = FirebaseAuth.getInstance().getCurrentUser() != null
                 ? FirebaseAuth.getInstance().getCurrentUser().getEmail()
-                : null);
+                : null;
 
         imagePickerLauncher = registerForActivityResult(
                 new ActivityResultContracts.OpenDocument(),
@@ -84,11 +84,9 @@ public class ProfileActivity extends AppCompatActivity {
                 }
         );
 
-        SharedPreferences prefs = getSharedPreferences("UserProfile", MODE_PRIVATE);
+        etName.setText(LocalUserStore.getProfileName(this, currentEmail, ""));
 
-        etName.setText(prefs.getString(currentEmailKey + "_name", ""));
-
-        String savedImage = prefs.getString(currentEmailKey + "_image", null);
+        String savedImage = LocalUserStore.getProfileImage(this, currentEmail);
         if (savedImage != null) {
             selectedImageUri = Uri.parse(savedImage);
             ivProfile.setImageURI(selectedImageUri);
@@ -107,25 +105,15 @@ public class ProfileActivity extends AppCompatActivity {
                 return;
             }
 
-            SharedPreferences.Editor editor = prefs.edit();
-            editor.putString(currentEmailKey + "_name", name);
+            LocalUserStore.saveProfileName(this, currentEmail, name);
 
             if (selectedImageUri != null) {
-                editor.putString(currentEmailKey + "_image", selectedImageUri.toString());
+                LocalUserStore.saveProfileImage(this, currentEmail, selectedImageUri.toString());
             }
-
-            editor.apply();
 
             Toast.makeText(this, "Profile Saved", Toast.LENGTH_SHORT).show();
             finish();
         });
-    }
-
-    private String buildProfileKey(String email) {
-        if (email == null || email.trim().isEmpty()) {
-            return "default_profile";
-        }
-        return email.trim().toLowerCase(Locale.US).replace(".", "_");
     }
 
     private void showPhotoOptions() {

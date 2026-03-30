@@ -1,7 +1,6 @@
 package com.example.tripsync.ui.activities;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +19,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.tripsync.R;
 import com.example.tripsync.ui.adapters.FeedAdapter;
 import com.example.tripsync.ui.common.EdgeToEdgeHelper;
+import com.example.tripsync.ui.common.LocalUserStore;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -206,7 +206,7 @@ public class TripListActivity extends AppCompatActivity {
                     startActivity(new Intent(this, MyGroupActivity.class));
                 } else if (item.getTitle().equals("Logout")) {
                     FirebaseAuth.getInstance().signOut();
-                    getSharedPreferences("SessionPrefs", MODE_PRIVATE).edit().clear().apply();
+                    LocalUserStore.clearSession(this);
 
                     Intent intent = new Intent(this, LoginActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -330,16 +330,13 @@ public class TripListActivity extends AppCompatActivity {
     }
 
     private void updateUserHeader() {
-        SharedPreferences sessionPrefs = getSharedPreferences("SessionPrefs", MODE_PRIVATE);
-        SharedPreferences profilePrefs = getSharedPreferences("UserProfile", MODE_PRIVATE);
-
-        String savedEmail = sessionPrefs.getString("user_email", "");
+        String savedEmail = LocalUserStore.getSessionEmail(this, "");
 
         if ((savedEmail == null || savedEmail.isEmpty()) && mAuth.getCurrentUser() != null) {
             savedEmail = mAuth.getCurrentUser().getEmail();
         }
 
-        String savedName = profilePrefs.getString(buildProfileKey(savedEmail) + "_name", "");
+        String savedName = LocalUserStore.getProfileName(this, savedEmail, "");
 
         if (savedName != null && !savedName.isEmpty()) {
             tvUserEmail.setText(savedName + "\n" + savedEmail);
@@ -351,10 +348,11 @@ public class TripListActivity extends AppCompatActivity {
     }
 
     private void ensureUserNameAvailable() {
-        SharedPreferences profilePrefs = getSharedPreferences("UserProfile", MODE_PRIVATE);
-        String currentEmail = getSharedPreferences("SessionPrefs", MODE_PRIVATE)
-                .getString("user_email", mAuth.getCurrentUser() != null ? mAuth.getCurrentUser().getEmail() : "");
-        String savedName = profilePrefs.getString(buildProfileKey(currentEmail) + "_name", "");
+        String currentEmail = LocalUserStore.getSessionEmail(
+                this,
+                mAuth.getCurrentUser() != null ? mAuth.getCurrentUser().getEmail() : ""
+        );
+        String savedName = LocalUserStore.getProfileName(this, currentEmail, "");
 
         if (savedName != null && !savedName.trim().isEmpty()) {
             isNameDialogShowing = false;
@@ -391,18 +389,11 @@ public class TripListActivity extends AppCompatActivity {
                 return;
             }
 
-            profilePrefs.edit().putString(buildProfileKey(currentEmail) + "_name", enteredName).apply();
+            LocalUserStore.saveProfileName(this, currentEmail, enteredName);
             updateUserHeader();
             Toast.makeText(this, "Welcome, " + enteredName, Toast.LENGTH_SHORT).show();
             dialog.dismiss();
         });
-    }
-
-    private String buildProfileKey(String email) {
-        if (email == null || email.trim().isEmpty()) {
-            return "default_profile";
-        }
-        return email.trim().toLowerCase(Locale.US).replace(".", "_");
     }
 
     private void openTripDetails(String tripDocId) {

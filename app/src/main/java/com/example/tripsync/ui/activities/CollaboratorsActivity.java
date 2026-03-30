@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.tripsync.R;
 import com.example.tripsync.ui.common.EdgeToEdgeHelper;
+import com.example.tripsync.ui.common.LocalUserStore;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -181,8 +182,8 @@ public class CollaboratorsActivity extends AppCompatActivity {
             return;
         }
 
-        String ownerName = getSharedPreferences("UserProfile", MODE_PRIVATE)
-                .getString("user_name", "Trip Owner");
+        String ownerEmail = auth.getCurrentUser() != null ? auth.getCurrentUser().getEmail() : null;
+        String ownerName = LocalUserStore.getProfileName(this, ownerEmail, "Trip Owner");
 
         Map<String, Object> member = new HashMap<>();
         member.put("name", ownerName);
