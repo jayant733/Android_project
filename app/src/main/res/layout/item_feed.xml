@@ -3,53 +3,58 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="14dp"
     android:background="@drawable/bg_card"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="16dp">
 
     <TextView
         android:id="@+id/tvFeedTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="15sp"
-        android:textStyle="bold"
-        android:textColor="#111827" />
+        android:textColor="@color/text_primary"
+        android:textSize="16sp"
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/tvFeedDetails"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="#6B7280"
-        android:textSize="13sp"
-        android:layout_marginTop="8dp" />
+        android:layout_marginTop="8dp"
+        android:textColor="@color/text_secondary"
+        android:textSize="13sp" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:layout_marginTop="14dp"
         android:gravity="center_vertical"
-        android:layout_marginTop="10dp">
+        android:orientation="horizontal">
 
         <TextView
             android:id="@+id/tvFeedRating"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:background="@drawable/bg_chip_warm"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="8dp"
             android:text="Avg Rating: 0.0 (0)"
-            android:textColor="#6B7280"
-            android:textSize="13sp" />
+            android:textColor="@color/text_primary"
+            android:textSize="13sp"
+            android:textStyle="bold" />
 
         <LinearLayout
             android:id="@+id/starContainer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:layout_marginStart="10dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
             <ImageView
                 android:id="@+id/star1"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                 android:layout_marginHorizontal="1dp"
                 android:clickable="true"
                 android:focusable="true"
@@ -57,8 +62,8 @@
 
             <ImageView
                 android:id="@+id/star2"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                 android:layout_marginHorizontal="1dp"
                 android:clickable="true"
                 android:focusable="true"
@@ -66,8 +71,8 @@
 
             <ImageView
                 android:id="@+id/star3"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                 android:layout_marginHorizontal="1dp"
                 android:clickable="true"
                 android:focusable="true"
@@ -75,8 +80,8 @@
 
             <ImageView
                 android:id="@+id/star4"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                 android:layout_marginHorizontal="1dp"
                 android:clickable="true"
                 android:focusable="true"
@@ -84,14 +89,12 @@
 
             <ImageView
                 android:id="@+id/star5"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                 android:layout_marginHorizontal="1dp"
                 android:clickable="true"
                 android:focusable="true"
                 android:src="@android:drawable/btn_star_big_off" />
-
         </LinearLayout>
-
     </LinearLayout>
 </LinearLayout>

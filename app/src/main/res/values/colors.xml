@@ -2,4 +2,26 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="brand_primary">#5B5CE2</color>
+    <color name="brand_primary_dark">#4343C4</color>
+    <color name="brand_secondary">#14B8A6</color>
+    <color name="brand_accent">#F59E0B</color>
+    <color name="danger">#E25353</color>
+    <color name="surface_base">#F4F7FB</color>
+    <color name="surface_top">#EFF4FF</color>
+    <color name="surface_bottom">#F8FBFF</color>
+    <color name="surface_card">#F7FAFF</color>
+    <color name="surface_card_strong">#FCFDFF</color>
+    <color name="surface_glass">#E6FFFFFF</color>
+    <color name="surface_glass_soft">#CCFFFFFF</color>
+    <color name="surface_input">#FDFEFF</color>
+    <color name="stroke_light">#D6E2F5</color>
+    <color name="stroke_brand">#A9B7FF</color>
+    <color name="text_primary">#162033</color>
+    <color name="text_secondary">#5B667A</color>
+    <color name="text_tertiary">#8792A7</color>
+    <color name="text_on_brand">#FFFFFFFF</color>
+    <color name="chip_blue">#E0E8FF</color>
+    <color name="chip_teal">#D7F6F0</color>
+    <color name="chip_warm">#FFF0D6</color>
 </resources>

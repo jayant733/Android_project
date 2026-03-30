@@ -2,6 +2,8 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/bg_screen_gradient"
+    android:clipToPadding="false"
     android:padding="20dp">
 
     <LinearLayout
@@ -9,102 +11,159 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <TextView
-            android:text="Create Trip"
-            android:textSize="26sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="20dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-
-        <ImageView
-            android:id="@+id/ivTripImage"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:scaleType="centerCrop"
-            android:background="#E5E7EB"
-            android:layout_marginBottom="10dp"/>
-
-        <Button
-            android:id="@+id/btnSelectImage"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:text="Select Trip Cover Image"
-            android:background="@drawable/bg_outline_button"
-            android:textColor="#6366F1"
-            android:textAllCaps="false"
-            android:layout_marginBottom="16dp"/>
-
-        <EditText
-            android:id="@+id/etTripName"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Trip Name"
-            android:padding="14dp"/>
+            android:background="@drawable/bg_accent_panel"
+            android:elevation="7dp"
+            android:orientation="vertical"
+            android:padding="24dp">
 
-        <EditText
-            android:id="@+id/etTripDetails"
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_chip_warm"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="6dp"
+                android:text="Create Trip"
+                android:textColor="@color/brand_accent"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Craft the trip before you share it."
+                android:textColor="@color/text_primary"
+                android:textSize="28sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Private trips stay on your dashboard. Posted trips also reach the community feed."
+                android:textColor="@color/text_secondary"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Trip Details"
-            android:minLines="3"
-            android:gravity="top"
-            android:layout_marginTop="12dp"
-            android:padding="14dp"/>
+            android:layout_marginTop="18dp"
+            android:background="@drawable/bg_card"
+            android:elevation="6dp"
+            android:orientation="vertical"
+            android:padding="22dp">
 
-        <EditText
-            android:id="@+id/etTripDays"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Number of Days"
-            android:inputType="number"
-            android:layout_marginTop="12dp"
-            android:padding="14dp"/>
+            <ImageView
+                android:id="@+id/ivTripImage"
+                android:layout_width="match_parent"
+                android:layout_height="210dp"
+                android:background="@drawable/bg_image_placeholder"
+                android:scaleType="centerCrop" />
 
-        <EditText
-            android:id="@+id/etLocation"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Location"
-            android:layout_marginTop="12dp"
-            android:padding="14dp"/>
+            <Button
+                android:id="@+id/btnSelectImage"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/bg_outline_button"
+                android:text="Select Trip Cover Image"
+                android:textAllCaps="false"
+                android:textColor="@color/brand_primary"
+                android:textStyle="bold" />
 
-        <EditText
-            android:id="@+id/etStartDate"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Start Date"
-            android:focusable="false"
-            android:layout_marginTop="12dp"
-            android:padding="14dp"/>
+            <EditText
+                android:id="@+id/etTripName"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="18dp"
+                android:background="@drawable/bg_input_surface"
+                android:hint="Trip Name"
+                android:paddingHorizontal="18dp"
+                android:textColor="@color/text_primary"
+                android:textColorHint="@color/text_tertiary" />
 
-        <Button
-            android:id="@+id/btnCreateTrip"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:text="Create"
-            android:background="@drawable/bg_primary_button"
-            android:textColor="@android:color/white"
-            android:textAllCaps="false"
-            android:layout_marginTop="20dp"/>
+            <EditText
+                android:id="@+id/etTripDetails"
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:layout_marginTop="14dp"
+                android:background="@drawable/bg_input_surface"
+                android:gravity="top"
+                android:hint="Trip Details"
+                android:minLines="4"
+                android:padding="18dp"
+                android:textColor="@color/text_primary"
+                android:textColorHint="@color/text_tertiary" />
 
-        <Button
-            android:id="@+id/btnPostTrip"
-            android:text="Create and  Post"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"/>
+            <EditText
+                android:id="@+id/etTripDays"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="14dp"
+                android:background="@drawable/bg_input_surface"
+                android:hint="Number of Days"
+                android:inputType="number"
+                android:paddingHorizontal="18dp"
+                android:textColor="@color/text_primary"
+                android:textColorHint="@color/text_tertiary" />
 
+            <EditText
+                android:id="@+id/etLocation"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="14dp"
+                android:background="@drawable/bg_input_surface"
+                android:hint="Location"
+                android:paddingHorizontal="18dp"
+                android:textColor="@color/text_primary"
+                android:textColorHint="@color/text_tertiary" />
 
-        <Button
-            android:id="@+id/btnBack"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:text="Back"
-            android:background="@drawable/bg_outline_button"
-            android:textColor="#6366F1"
-            android:textAllCaps="false"
-            android:layout_marginTop="12dp"/>
+            <EditText
+                android:id="@+id/etStartDate"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="14dp"
+                android:background="@drawable/bg_input_surface"
+                android:focusable="false"
+                android:hint="Start Date"
+                android:paddingHorizontal="18dp"
+                android:textColor="@color/text_primary"
+                android:textColorHint="@color/text_tertiary" />
 
+            <Button
+                android:id="@+id/btnCreateTrip"
+                android:layout_width="match_parent"
+                android:layout_height="54dp"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/bg_primary_button"
+                android:text="Create"
+                android:textAllCaps="false"
+                android:textColor="@color/text_on_brand"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btnPostTrip"
+                android:layout_width="match_parent"
+                android:layout_height="54dp"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_outline_button"
+                android:text="Create and Post"
+                android:textAllCaps="false"
+                android:textColor="@color/brand_primary"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btnBack"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_outline_button"
+                android:text="Back"
+                android:textAllCaps="false"
+                android:textColor="@color/brand_primary" />
+        </LinearLayout>
     </LinearLayout>
 </ScrollView>

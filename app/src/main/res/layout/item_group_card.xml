@@ -2,43 +2,47 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginBottom="10dp"
+    android:background="@drawable/bg_card"
     android:orientation="vertical"
-    android:background="#FFFFFF"
-    android:padding="14dp"
-    android:layout_marginBottom="10dp">
+    android:padding="16dp">
 
     <TextView
         android:id="@+id/tvGroupName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Goa Crew"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:textColor="#111827" />
+        android:textColor="@color/text_primary"
+        android:textSize="17sp"
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/tvGroupTrip"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
         android:text="Goa Trip"
-        android:textColor="#374151"
-        android:layout_marginTop="4dp" />
+        android:textColor="@color/text_secondary" />
 
     <TextView
         android:id="@+id/tvGroupRole"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:background="@drawable/bg_chip_soft"
+        android:paddingHorizontal="10dp"
+        android:paddingVertical="6dp"
         android:text="Member: Jayant"
-        android:textColor="#6B7280"
-        android:layout_marginTop="4dp"
-        android:layout_marginBottom="10dp" />
+        android:textColor="@color/brand_primary" />
 
     <Button
         android:id="@+id/btnOpenGroup"
         android:layout_width="match_parent"
-        android:layout_height="44dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="14dp"
+        android:background="@drawable/bg_primary_button"
         android:text="Open Group"
         android:textAllCaps="false"
-        android:background="@drawable/bg_primary_button"
-        android:textColor="@android:color/white" />
+        android:textColor="@color/text_on_brand"
+        android:textStyle="bold" />
 </LinearLayout>
