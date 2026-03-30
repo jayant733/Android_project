@@ -209,7 +209,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="22dp"
-        app:backgroundTint="@color/brand_primary"
+        app:backgroundTint="@color/brand_secondary"
         app:elevation="10dp"
         app:srcCompat="@android:drawable/ic_input_add"
         app:tint="@color/text_on_brand" />
