@@ -48,6 +48,7 @@ public class TripListActivity extends AppCompatActivity {
 
     ArrayList<String> upcomingTrips;
     ArrayList<String> upcomingTripDocIds;
+    ArrayList<String> upcomingTripImageUris;
     ArrayAdapter<String> adapter;
 
     FirebaseFirestore db;
@@ -108,6 +109,7 @@ public class TripListActivity extends AppCompatActivity {
     private void loadTripsFromCloud() {
         upcomingTrips = new ArrayList<>();
         upcomingTripDocIds = new ArrayList<>();
+        upcomingTripImageUris = new ArrayList<>();
         currentTripDocId = null;
         Date today = getStartOfToday();
 
@@ -132,6 +134,7 @@ public class TripListActivity extends AppCompatActivity {
                         String destination = doc.getString("location");
                         String startDateStr = doc.getString("startDate");
                         String savedStatus = doc.getString("status");
+                        String imageUri = doc.getString("imageUri");
 
                         if (name == null || destination == null || startDateStr == null) {
                             continue;
@@ -170,6 +173,7 @@ public class TripListActivity extends AppCompatActivity {
                                 long daysRemaining = Math.max(0, (tripDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
                                 upcomingTrips.add(name + " - " + destination + " (" + daysRemaining + " days remaining)");
                                 upcomingTripDocIds.add(doc.getId());
+                                upcomingTripImageUris.add(imageUri != null ? imageUri : "");
                             }
                         } catch (ParseException e) {
                             Toast.makeText(this, "Invalid trip date found", Toast.LENGTH_SHORT).show();
@@ -465,6 +469,7 @@ public class TripListActivity extends AppCompatActivity {
             TextView name = convertView.findViewById(R.id.tvTripItemName);
             TextView destination = convertView.findViewById(R.id.tvTripItemDestination);
             ImageView menu = convertView.findViewById(R.id.ivMenu);
+            ImageView cover = convertView.findViewById(R.id.ivTripItemCover);
 
             String item = upcomingTrips.get(position);
             String[] primarySplit = item.split(" - ", 2);
@@ -473,6 +478,18 @@ public class TripListActivity extends AppCompatActivity {
 
             name.setText(tripName);
             destination.setText(meta);
+
+            String imageUri = upcomingTripImageUris.size() > position ? upcomingTripImageUris.get(position) : "";
+            cover.setImageURI(null);
+            if (imageUri != null && !imageUri.trim().isEmpty()) {
+                try {
+                    cover.setImageURI(Uri.parse(imageUri));
+                } catch (Exception e) {
+                    cover.setImageDrawable(null);
+                }
+            } else {
+                cover.setImageDrawable(null);
+            }
 
             menu.setOnClickListener(v -> {
                 PopupMenu popup = new PopupMenu(TripListActivity.this, menu);
