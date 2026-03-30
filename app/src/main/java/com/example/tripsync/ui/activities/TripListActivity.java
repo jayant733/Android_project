@@ -1,6 +1,7 @@
 package com.example.tripsync.ui.activities;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -344,6 +345,23 @@ public class TripListActivity extends AppCompatActivity {
             tvUserEmail.setText("Logged in as:\n" + savedEmail);
         } else {
             tvUserEmail.setText("TripSync User");
+        }
+
+        updateProfileImage(savedEmail);
+    }
+
+    private void updateProfileImage(String email) {
+        String savedImage = LocalUserStore.getProfileImage(this, email);
+
+        if (savedImage == null || savedImage.trim().isEmpty()) {
+            ivProfileIcon.setImageDrawable(null);
+            return;
+        }
+
+        try {
+            ivProfileIcon.setImageURI(Uri.parse(savedImage));
+        } catch (Exception e) {
+            ivProfileIcon.setImageDrawable(null);
         }
     }
 
