@@ -13,6 +13,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.tripsync.R;
+import com.example.tripsync.ui.common.EdgeToEdgeHelper;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -51,6 +52,7 @@ public class CollaboratorsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_collaborators);
+        EdgeToEdgeHelper.apply(this);
 
         tripDocId = getIntent().getStringExtra("trip_doc_id");
         db = FirebaseFirestore.getInstance();

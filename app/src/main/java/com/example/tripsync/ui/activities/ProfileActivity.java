@@ -17,6 +17,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.tripsync.R;
+import com.example.tripsync.ui.common.EdgeToEdgeHelper;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.io.File;
@@ -39,6 +40,7 @@ public class ProfileActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
+        EdgeToEdgeHelper.apply(this);
 
         ivProfile = findViewById(R.id.ivProfile);
         etName = findViewById(R.id.etName);

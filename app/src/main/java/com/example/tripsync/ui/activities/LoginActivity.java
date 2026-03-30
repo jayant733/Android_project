@@ -9,6 +9,7 @@ import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.tripsync.R;
+import com.example.tripsync.ui.common.EdgeToEdgeHelper;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class LoginActivity extends AppCompatActivity {
@@ -23,6 +24,7 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        EdgeToEdgeHelper.apply(this);
 
         etEmail = findViewById(R.id.tEmail);
         etPassword = findViewById(R.id.tPassword);

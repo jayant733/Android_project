@@ -19,6 +19,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.tripsync.R;
 import com.example.tripsync.ui.adapters.FeedAdapter;
+import com.example.tripsync.ui.common.EdgeToEdgeHelper;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -59,6 +60,7 @@ public class TripListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_trip_list);
+        EdgeToEdgeHelper.apply(this);
 
         listTrips = findViewById(R.id.listTrips);
         listFeed = findViewById(R.id.listFeed);

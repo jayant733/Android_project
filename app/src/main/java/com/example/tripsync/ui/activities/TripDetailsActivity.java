@@ -17,6 +17,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.tripsync.R;
+import com.example.tripsync.ui.common.EdgeToEdgeHelper;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -41,6 +42,7 @@ public class TripDetailsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_trip_details);
+        EdgeToEdgeHelper.apply(this);
 
         tvTripName = findViewById(R.id.tvTripName);
         tvPlan = findViewById(R.id.tvPlan);

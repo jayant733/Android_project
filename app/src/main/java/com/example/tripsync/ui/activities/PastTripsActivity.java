@@ -13,6 +13,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.tripsync.R;
+import com.example.tripsync.ui.common.EdgeToEdgeHelper;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -32,6 +33,7 @@ public class PastTripsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_past_trips);
+        EdgeToEdgeHelper.apply(this);
 
         listPastTrips = findViewById(R.id.listPastTrips);
         tvPastTripCount = findViewById(R.id.tvPastTripCount);
