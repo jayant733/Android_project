@@ -349,11 +349,7 @@ public class TripListActivity extends AppCompatActivity {
     }
 
     private void updateUserHeader() {
-        String savedEmail = LocalUserStore.getSessionEmail(this, "");
-
-        if ((savedEmail == null || savedEmail.isEmpty()) && mAuth.getCurrentUser() != null) {
-            savedEmail = mAuth.getCurrentUser().getEmail();
-        }
+        String savedEmail = resolveCurrentEmail();
 
         String savedName = LocalUserStore.getProfileName(this, savedEmail, "");
 
@@ -398,10 +394,11 @@ public class TripListActivity extends AppCompatActivity {
     }
 
     private void ensureUserNameAvailable() {
-        String currentEmail = LocalUserStore.getSessionEmail(
-                this,
-                mAuth.getCurrentUser() != null ? mAuth.getCurrentUser().getEmail() : ""
-        );
+        String currentEmail = resolveCurrentEmail();
+        if (currentEmail == null || currentEmail.trim().isEmpty()) {
+            return;
+        }
+
         String savedName = LocalUserStore.getProfileName(this, currentEmail, "");
 
         if (savedName != null && !savedName.trim().isEmpty()) {
@@ -444,6 +441,16 @@ public class TripListActivity extends AppCompatActivity {
             Toast.makeText(this, "Welcome, " + enteredName, Toast.LENGTH_SHORT).show();
             dialog.dismiss();
         });
+    }
+
+    private String resolveCurrentEmail() {
+        if (mAuth.getCurrentUser() != null && mAuth.getCurrentUser().getEmail() != null) {
+            String authEmail = mAuth.getCurrentUser().getEmail();
+            LocalUserStore.saveSessionEmail(this, authEmail);
+            return authEmail;
+        }
+
+        return LocalUserStore.getSessionEmail(this, "");
     }
 
     private void openTripDetails(String tripDocId) {

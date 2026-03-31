@@ -271,7 +271,13 @@ public class CollaboratorsActivity extends AppCompatActivity {
             return;
         }
 
-        double amount = Double.parseDouble(amountStr);
+        double amount;
+        try {
+            amount = Double.parseDouble(amountStr);
+        } catch (NumberFormatException e) {
+            Toast.makeText(this, "Enter a valid amount", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         Map<String, Object> expense = new HashMap<>();
         expense.put("paidBy", paidBy);

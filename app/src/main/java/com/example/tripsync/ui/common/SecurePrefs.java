@@ -53,6 +53,7 @@ public final class SecurePrefs {
         try {
             return decrypt(storedValue);
         } catch (Exception e) {
+            prefs.edit().remove(key).apply();
             return defaultValue;
         }
     }
