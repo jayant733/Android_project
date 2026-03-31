@@ -85,9 +85,7 @@ public class TripDetailsActivity extends AppCompatActivity {
                             .collection("trips")
                             .document(tripDocId)
                             .update("imageUri", uri.toString())
-                            .addOnSuccessListener(unused ->
-                                    Toast.makeText(this, "Trip image updated", Toast.LENGTH_SHORT).show()
-                            )
+                            .addOnSuccessListener(unused -> updateFeedImage(uri.toString()))
                             .addOnFailureListener(e ->
                                     Toast.makeText(this, "Could not update image", Toast.LENGTH_SHORT).show()
                             );
@@ -322,5 +320,26 @@ public class TripDetailsActivity extends AppCompatActivity {
                 .document(auth.getCurrentUser().getUid())
                 .collection("trips")
                 .document(tripDocId);
+    }
+
+    private void updateFeedImage(String imageUri) {
+        if (auth.getCurrentUser() == null) {
+            Toast.makeText(this, "Trip image updated", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        db.collection("feed")
+                .whereEqualTo("tripDocId", tripDocId)
+                .whereEqualTo("userId", auth.getCurrentUser().getUid())
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    for (com.google.firebase.firestore.DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
+                        doc.getReference().update("imageUri", imageUri);
+                    }
+                    Toast.makeText(this, "Trip image updated", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Trip image updated locally, but feed sync failed", Toast.LENGTH_SHORT).show()
+                );
     }
 }

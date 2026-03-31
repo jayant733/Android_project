@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListAdapter;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -119,6 +120,7 @@ public class TripListActivity extends AppCompatActivity {
             tvCurrentDestination.setText("Log in to view your trips");
             ivCurrentTripCover.setImageDrawable(null);
             listTrips.setAdapter(new TripAdapter());
+            setListViewHeightBasedOnChildren(listTrips);
             tvStats.setText("Upcoming Trips: 0 | Past Trips: 0");
             return;
         }
@@ -192,6 +194,7 @@ public class TripListActivity extends AppCompatActivity {
 
                     adapter = new TripAdapter();
                     listTrips.setAdapter(adapter);
+                    setListViewHeightBasedOnChildren(listTrips);
                     tvStats.setText("Upcoming Trips: " + upcomingTrips.size() + " | Past Trips: " + pastTripCount);
                 })
                 .addOnFailureListener(e ->
@@ -261,6 +264,7 @@ public class TripListActivity extends AppCompatActivity {
 
                     if (visibleDocs.isEmpty()) {
                         feedAdapter.notifyDataSetChanged();
+                        setListViewHeightBasedOnChildren(listFeed);
                         return;
                     }
 
@@ -270,6 +274,7 @@ public class TripListActivity extends AppCompatActivity {
                         }
                         sortFeedTrips();
                         feedAdapter.notifyDataSetChanged();
+                        setListViewHeightBasedOnChildren(listFeed);
                         return;
                     }
 
@@ -286,6 +291,7 @@ public class TripListActivity extends AppCompatActivity {
                                     if (pending[0] == 0) {
                                         sortFeedTrips();
                                         feedAdapter.notifyDataSetChanged();
+                                        setListViewHeightBasedOnChildren(listFeed);
                                     }
                                 })
                                 .addOnFailureListener(fetchError -> {
@@ -294,6 +300,7 @@ public class TripListActivity extends AppCompatActivity {
                                     if (pending[0] == 0) {
                                         sortFeedTrips();
                                         feedAdapter.notifyDataSetChanged();
+                                        setListViewHeightBasedOnChildren(listFeed);
                                     }
                                 });
                     }
@@ -475,6 +482,63 @@ public class TripListActivity extends AppCompatActivity {
         }
     }
 
+    private void setListViewHeightBasedOnChildren(ListView listView) {
+        ListAdapter listAdapter = listView.getAdapter();
+        if (listAdapter == null) {
+            return;
+        }
+
+        int desiredWidth = View.MeasureSpec.makeMeasureSpec(listView.getWidth(), View.MeasureSpec.AT_MOST);
+        int totalHeight = 0;
+
+        for (int i = 0; i < listAdapter.getCount(); i++) {
+            View listItem = listAdapter.getView(i, null, listView);
+            listItem.measure(desiredWidth, View.MeasureSpec.UNSPECIFIED);
+            totalHeight += listItem.getMeasuredHeight();
+        }
+
+        ViewGroup.LayoutParams params = listView.getLayoutParams();
+        params.height = totalHeight + (listView.getDividerHeight() * Math.max(0, listAdapter.getCount() - 1));
+        listView.setLayoutParams(params);
+        listView.requestLayout();
+    }
+
+    private void deleteUpcomingTrip(String tripDocId) {
+        if (mAuth.getCurrentUser() == null) {
+            return;
+        }
+
+        db.collection("users")
+                .document(mAuth.getCurrentUser().getUid())
+                .collection("trips")
+                .document(tripDocId)
+                .delete()
+                .addOnSuccessListener(unused -> {
+                    deleteTripFromFeed(tripDocId);
+                    loadTripsFromCloud();
+                    Toast.makeText(this, "Trip deleted", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Could not delete trip", Toast.LENGTH_SHORT).show()
+                );
+    }
+
+    private void deleteTripFromFeed(String tripDocId) {
+        if (mAuth.getCurrentUser() == null) {
+            return;
+        }
+
+        db.collection("feed")
+                .whereEqualTo("tripDocId", tripDocId)
+                .whereEqualTo("userId", mAuth.getCurrentUser().getUid())
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    for (DocumentSnapshot snapshot : queryDocumentSnapshots.getDocuments()) {
+                        snapshot.getReference().delete();
+                    }
+                });
+    }
+
     private class TripAdapter extends ArrayAdapter<String> {
 
         public TripAdapter() {
@@ -506,8 +570,20 @@ public class TripListActivity extends AppCompatActivity {
             menu.setOnClickListener(v -> {
                 PopupMenu popup = new PopupMenu(TripListActivity.this, menu);
                 popup.getMenu().add("Share");
+                popup.getMenu().add("Delete Trip");
 
                 popup.setOnMenuItemClickListener(menuItem -> {
+                    if ("Delete Trip".contentEquals(menuItem.getTitle())) {
+                        new AlertDialog.Builder(TripListActivity.this)
+                                .setTitle("Delete trip?")
+                                .setMessage("This will remove the trip from your list and your travel feed post.")
+                                .setPositiveButton("Delete", (dialog, which) ->
+                                        deleteUpcomingTrip(upcomingTripDocIds.get(position)))
+                                .setNegativeButton("Cancel", null)
+                                .show();
+                        return true;
+                    }
+
                     Intent shareIntent = new Intent(Intent.ACTION_SEND);
                     shareIntent.setType("text/plain");
                     shareIntent.putExtra(Intent.EXTRA_TEXT, item);

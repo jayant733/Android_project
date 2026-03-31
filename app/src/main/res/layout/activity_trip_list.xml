@@ -6,12 +6,19 @@
     android:layout_height="match_parent"
     android:background="@drawable/bg_screen_gradient">
 
-    <LinearLayout
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/homeScroll"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
-        android:orientation="vertical"
-        android:padding="18dp">
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipToPadding="false"
+            android:orientation="vertical"
+            android:padding="18dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -185,13 +192,13 @@
         <ListView
             android:id="@+id/listTrips"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:layout_weight="1"
             android:background="@android:color/transparent"
             android:clipToPadding="false"
             android:divider="@android:color/transparent"
             android:dividerHeight="10dp"
+            android:nestedScrollingEnabled="false"
             android:paddingBottom="6dp" />
 
         <TextView
@@ -214,14 +221,16 @@
         <ListView
             android:id="@+id/listFeed"
             android:layout_width="match_parent"
-            android:layout_height="220dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:background="@android:color/transparent"
             android:clipToPadding="false"
             android:divider="@android:color/transparent"
             android:dividerHeight="10dp"
+            android:nestedScrollingEnabled="false"
             android:paddingBottom="8dp" />
-    </LinearLayout>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabCreateTrip"
