@@ -7,6 +7,7 @@ public class FeedPost {
     public final String details;
     public final String email;
     public final String userId;
+    public final String imageUri;
     public final float averageRating;
     public final int ratingCount;
     public final boolean hasUserRated;
@@ -18,6 +19,7 @@ public class FeedPost {
                     String details,
                     String email,
                     String userId,
+                    String imageUri,
                     float averageRating,
                     int ratingCount,
                     boolean hasUserRated,
@@ -28,6 +30,7 @@ public class FeedPost {
         this.details = details;
         this.email = email;
         this.userId = userId;
+        this.imageUri = imageUri;
         this.averageRating = averageRating;
         this.ratingCount = ratingCount;
         this.hasUserRated = hasUserRated;

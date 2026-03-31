@@ -44,7 +44,7 @@ public class TripListActivity extends AppCompatActivity {
     LinearLayout currentTripCard;
 
     TextView tvCurrentTrip, tvCurrentDestination, tvStats, tvUserEmail;
-    ImageView ivProfileIcon;
+    ImageView ivProfileIcon, ivCurrentTripCover;
 
     ArrayList<String> upcomingTrips;
     ArrayList<String> upcomingTripDocIds;
@@ -73,6 +73,7 @@ public class TripListActivity extends AppCompatActivity {
         tvStats = findViewById(R.id.tvStats);
         tvUserEmail = findViewById(R.id.tvUserEmail);
         ivProfileIcon = findViewById(R.id.ivProfileIcon);
+        ivCurrentTripCover = findViewById(R.id.ivCurrentTripCover);
 
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
@@ -116,6 +117,7 @@ public class TripListActivity extends AppCompatActivity {
         if (mAuth.getCurrentUser() == null) {
             tvCurrentTrip.setText("No Active Trip");
             tvCurrentDestination.setText("Log in to view your trips");
+            ivCurrentTripCover.setImageDrawable(null);
             listTrips.setAdapter(new TripAdapter());
             tvStats.setText("Upcoming Trips: 0 | Past Trips: 0");
             return;
@@ -160,6 +162,7 @@ public class TripListActivity extends AppCompatActivity {
                                     currentTripDocId = doc.getId();
                                     tvCurrentTrip.setText(name);
                                     tvCurrentDestination.setText(destination + " (Trip in progress)");
+                                    loadImageIntoView(ivCurrentTripCover, imageUri);
                                 }
                                 continue;
                             }
@@ -169,6 +172,7 @@ public class TripListActivity extends AppCompatActivity {
                                 currentTripDocId = doc.getId();
                                 tvCurrentTrip.setText(name);
                                 tvCurrentDestination.setText(destination + " (Starts now)");
+                                loadImageIntoView(ivCurrentTripCover, imageUri);
                             } else {
                                 long daysRemaining = Math.max(0, (tripDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
                                 upcomingTrips.add(name + " - " + destination + " (" + daysRemaining + " days remaining)");
@@ -183,6 +187,7 @@ public class TripListActivity extends AppCompatActivity {
                     if (currentTripDocId == null) {
                         tvCurrentTrip.setText("No Active Trip");
                         tvCurrentDestination.setText("Start planning today!");
+                        ivCurrentTripCover.setImageDrawable(null);
                     }
 
                     adapter = new TripAdapter();
@@ -301,6 +306,7 @@ public class TripListActivity extends AppCompatActivity {
         String location = doc.getString("location");
         String details = doc.getString("details");
         String email = doc.getString("email");
+        String imageUri = doc.getString("imageUri");
         Double averageRating = doc.getDouble("averageRating");
         Long ratingCount = doc.getLong("ratingCount");
         Long timestamp = doc.getLong("timestamp");
@@ -316,6 +322,7 @@ public class TripListActivity extends AppCompatActivity {
                 details != null ? details : "",
                 email,
                 ownerUserId != null ? ownerUserId : "",
+                imageUri != null ? imageUri : "",
                 averageRating != null ? averageRating.floatValue() : 0f,
                 ratingCount != null ? ratingCount.intValue() : 0,
                 hasUserRated,
@@ -366,6 +373,20 @@ public class TripListActivity extends AppCompatActivity {
             ivProfileIcon.setImageURI(Uri.parse(savedImage));
         } catch (Exception e) {
             ivProfileIcon.setImageDrawable(null);
+        }
+    }
+
+    private void loadImageIntoView(ImageView imageView, String imageUri) {
+        imageView.setImageURI(null);
+        if (imageUri == null || imageUri.trim().isEmpty()) {
+            imageView.setImageDrawable(null);
+            return;
+        }
+
+        try {
+            imageView.setImageURI(Uri.parse(imageUri));
+        } catch (Exception e) {
+            imageView.setImageDrawable(null);
         }
     }
 
@@ -480,16 +501,7 @@ public class TripListActivity extends AppCompatActivity {
             destination.setText(meta);
 
             String imageUri = upcomingTripImageUris.size() > position ? upcomingTripImageUris.get(position) : "";
-            cover.setImageURI(null);
-            if (imageUri != null && !imageUri.trim().isEmpty()) {
-                try {
-                    cover.setImageURI(Uri.parse(imageUri));
-                } catch (Exception e) {
-                    cover.setImageDrawable(null);
-                }
-            } else {
-                cover.setImageDrawable(null);
-            }
+            loadImageIntoView(cover, imageUri);
 
             menu.setOnClickListener(v -> {
                 PopupMenu popup = new PopupMenu(TripListActivity.this, menu);

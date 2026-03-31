@@ -1,6 +1,7 @@
 package com.example.tripsync.ui.adapters;
 
 import android.content.Context;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,6 +50,7 @@ public class FeedAdapter extends ArrayAdapter<FeedPost> {
         TextView title = convertView.findViewById(R.id.tvFeedTitle);
         TextView details = convertView.findViewById(R.id.tvFeedDetails);
         TextView ratingText = convertView.findViewById(R.id.tvFeedRating);
+        ImageView cover = convertView.findViewById(R.id.ivFeedCover);
         ImageView star1 = convertView.findViewById(R.id.star1);
         ImageView star2 = convertView.findViewById(R.id.star2);
         ImageView star3 = convertView.findViewById(R.id.star3);
@@ -60,6 +62,7 @@ public class FeedAdapter extends ArrayAdapter<FeedPost> {
         title.setText(post.tripName + "\n" + post.location + "\n" + post.email);
         details.setText(post.details != null && !post.details.isEmpty() ? post.details : "Shared trip post");
         ratingText.setText("Avg Rating: " + String.format(Locale.US, "%.1f", post.averageRating) + " (" + post.ratingCount + ")");
+        bindImage(cover, post.imageUri);
         renderStars(stars, Math.round(post.averageRating));
 
         if (auth.getCurrentUser() == null) {
@@ -190,6 +193,20 @@ public class FeedAdapter extends ArrayAdapter<FeedPost> {
             stars[i].setImageResource(i < rating
                     ? android.R.drawable.btn_star_big_on
                     : android.R.drawable.btn_star_big_off);
+        }
+    }
+
+    private void bindImage(ImageView imageView, String imageUri) {
+        imageView.setImageURI(null);
+        if (imageUri == null || imageUri.trim().isEmpty()) {
+            imageView.setImageDrawable(null);
+            return;
+        }
+
+        try {
+            imageView.setImageURI(Uri.parse(imageUri));
+        } catch (Exception e) {
+            imageView.setImageDrawable(null);
         }
     }
 
