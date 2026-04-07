@@ -67,13 +67,11 @@
             <Button
                 android:id="@+id/btnSelectImage"
                 android:layout_width="match_parent"
-                android:layout_height="52dp"
+                android:layout_height="46dp"
                 android:layout_marginTop="20dp"
                 android:background="@drawable/bg_outline_button"
                 android:text="Update Profile Photo"
-                android:textAllCaps="false"
-                android:textColor="@color/brand_primary"
-                android:textStyle="bold" />
+                android:textColor="@color/brand_primary" />
 
             <EditText
                 android:id="@+id/etName"
@@ -89,13 +87,11 @@
             <Button
                 android:id="@+id/btnSave"
                 android:layout_width="match_parent"
-                android:layout_height="54dp"
+                android:layout_height="48dp"
                 android:layout_marginTop="18dp"
                 android:background="@drawable/bg_primary_button"
                 android:text="Save Profile"
-                android:textAllCaps="false"
-                android:textColor="@color/text_on_brand"
-                android:textStyle="bold" />
+                android:textColor="@color/text_on_brand" />
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

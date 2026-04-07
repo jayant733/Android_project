@@ -66,13 +66,11 @@
             <Button
                 android:id="@+id/btnSelectImage"
                 android:layout_width="match_parent"
-                android:layout_height="52dp"
+                android:layout_height="46dp"
                 android:layout_marginTop="16dp"
                 android:background="@drawable/bg_outline_button"
                 android:text="Select Trip Cover Image"
-                android:textAllCaps="false"
-                android:textColor="@color/brand_primary"
-                android:textStyle="bold" />
+                android:textColor="@color/brand_primary" />
 
             <EditText
                 android:id="@+id/etTripName"
@@ -136,33 +134,28 @@
             <Button
                 android:id="@+id/btnCreateTrip"
                 android:layout_width="match_parent"
-                android:layout_height="54dp"
+                android:layout_height="48dp"
                 android:layout_marginTop="20dp"
                 android:background="@drawable/bg_primary_button"
                 android:text="Create"
-                android:textAllCaps="false"
-                android:textColor="@color/text_on_brand"
-                android:textStyle="bold" />
+                android:textColor="@color/text_on_brand" />
 
             <Button
                 android:id="@+id/btnPostTrip"
                 android:layout_width="match_parent"
-                android:layout_height="54dp"
+                android:layout_height="48dp"
                 android:layout_marginTop="12dp"
                 android:background="@drawable/bg_secondary_button"
                 android:text="Create and Post"
-                android:textAllCaps="false"
-                android:textColor="@color/text_on_brand"
-                android:textStyle="bold" />
+                android:textColor="@color/text_on_brand" />
 
             <Button
                 android:id="@+id/btnBack"
                 android:layout_width="match_parent"
-                android:layout_height="52dp"
+                android:layout_height="46dp"
                 android:layout_marginTop="12dp"
                 android:background="@drawable/bg_outline_button"
                 android:text="Back"
-                android:textAllCaps="false"
                 android:textColor="@color/brand_primary" />
         </LinearLayout>
     </LinearLayout>

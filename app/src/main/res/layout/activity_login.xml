@@ -102,14 +102,11 @@
             <Button
                 android:id="@+id/tnLogin"
                 android:layout_width="match_parent"
-                android:layout_height="54dp"
+                android:layout_height="48dp"
                 android:layout_marginTop="18dp"
                 android:background="@drawable/bg_primary_button"
                 android:text="Login"
-                android:textAllCaps="false"
-                android:textColor="@color/text_on_brand"
-                android:textSize="16sp"
-                android:textStyle="bold" />
+                android:textColor="@color/text_on_brand" />
 
             <TextView
                 android:id="@+id/vGoSignup"

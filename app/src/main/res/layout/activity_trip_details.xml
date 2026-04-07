@@ -29,13 +29,11 @@
             <Button
                 android:id="@+id/btnUpdateTripImage"
                 android:layout_width="match_parent"
-                android:layout_height="52dp"
+                android:layout_height="46dp"
                 android:layout_marginTop="14dp"
                 android:background="@drawable/bg_outline_button"
                 android:text="Update Trip Cover"
-                android:textAllCaps="false"
-                android:textColor="@color/brand_primary"
-                android:textStyle="bold" />
+                android:textColor="@color/brand_primary" />
 
             <TextView
                 android:id="@+id/tvTripName"
@@ -165,26 +163,22 @@
             <Button
                 android:id="@+id/btnStartTrip"
                 android:layout_width="0dp"
-                android:layout_height="52dp"
+                android:layout_height="46dp"
                 android:layout_marginEnd="7dp"
                 android:layout_weight="1"
                 android:background="@drawable/bg_primary_button"
                 android:text="Start"
-                android:textAllCaps="false"
-                android:textColor="@color/text_on_brand"
-                android:textStyle="bold" />
+                android:textColor="@color/text_on_brand" />
 
             <Button
                 android:id="@+id/btnCompleteTrip"
                 android:layout_width="0dp"
-                android:layout_height="52dp"
+                android:layout_height="46dp"
                 android:layout_marginStart="7dp"
                 android:layout_weight="1"
                 android:background="@drawable/bg_warm_button"
                 android:text="Complete"
-                android:textAllCaps="false"
-                android:textColor="@color/text_on_brand"
-                android:textStyle="bold" />
+                android:textColor="@color/text_on_brand" />
         </LinearLayout>
 
         <LinearLayout
@@ -197,47 +191,40 @@
             <Button
                 android:id="@+id/btnCollaborators"
                 android:layout_width="0dp"
-                android:layout_height="52dp"
+                android:layout_height="46dp"
                 android:layout_marginEnd="7dp"
                 android:layout_weight="1"
                 android:background="@drawable/bg_secondary_button"
                 android:text="Trip Group"
-                android:textAllCaps="false"
-                android:textColor="@color/text_on_brand"
-                android:textStyle="bold" />
+                android:textColor="@color/text_on_brand" />
 
             <Button
                 android:id="@+id/btnMyGroups"
                 android:layout_width="0dp"
-                android:layout_height="52dp"
+                android:layout_height="46dp"
                 android:layout_marginStart="7dp"
                 android:layout_weight="1"
                 android:background="@drawable/bg_outline_button"
                 android:text="My Groups"
-                android:textAllCaps="false"
-                android:textColor="@color/brand_primary"
-                android:textStyle="bold" />
+                android:textColor="@color/brand_primary" />
         </LinearLayout>
 
         <Button
             android:id="@+id/btnDeleteTrip"
             android:layout_width="match_parent"
-            android:layout_height="52dp"
+            android:layout_height="46dp"
             android:layout_marginTop="12dp"
             android:background="@drawable/bg_danger_button"
             android:text="Delete Trip"
-            android:textAllCaps="false"
-            android:textColor="@color/text_on_brand"
-            android:textStyle="bold" />
+            android:textColor="@color/text_on_brand" />
 
         <Button
             android:id="@+id/btnBack"
             android:layout_width="match_parent"
-            android:layout_height="52dp"
+            android:layout_height="46dp"
             android:layout_marginTop="12dp"
             android:background="@drawable/bg_outline_button"
             android:text="Back"
-            android:textAllCaps="false"
             android:textColor="@color/brand_primary" />
     </LinearLayout>
 </ScrollView>

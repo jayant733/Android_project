@@ -116,11 +116,10 @@
         <Button
             android:id="@+id/btnBackGroups"
             android:layout_width="match_parent"
-            android:layout_height="52dp"
+            android:layout_height="46dp"
             android:layout_marginTop="16dp"
             android:background="@drawable/bg_outline_button"
             android:text="Back"
-            android:textAllCaps="false"
             android:textColor="@color/brand_primary" />
     </LinearLayout>
 </ScrollView>

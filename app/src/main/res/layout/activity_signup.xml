@@ -94,14 +94,11 @@
             <Button
                 android:id="@+id/tnSignup1"
                 android:layout_width="match_parent"
-                android:layout_height="54dp"
+                android:layout_height="48dp"
                 android:layout_marginTop="18dp"
                 android:background="@drawable/bg_primary_button"
                 android:text="Create Account"
-                android:textAllCaps="false"
-                android:textColor="@color/text_on_brand"
-                android:textSize="16sp"
-                android:textStyle="bold" />
+                android:textColor="@color/text_on_brand" />
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

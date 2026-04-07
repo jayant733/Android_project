@@ -2,15 +2,15 @@
     <item android:state_pressed="true">
         <shape>
             <stroke android:width="1.5dp" android:color="@color/brand_primary"/>
-            <corners android:radius="16dp"/>
-            <solid android:color="#EAF1FF"/>
+            <corners android:radius="14dp"/>
+            <solid android:color="#EDF4FF"/>
         </shape>
     </item>
     <item>
         <shape>
             <stroke android:width="1.5dp" android:color="@color/stroke_brand"/>
-            <corners android:radius="16dp"/>
-            <solid android:color="@color/surface_glass_soft"/>
+            <corners android:radius="14dp"/>
+            <solid android:color="#F7FAFF"/>
         </shape>
     </item>
 </selector>
