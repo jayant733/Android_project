@@ -29,11 +29,11 @@
             <Button
                 android:id="@+id/btnUpdateTripImage"
                 android:layout_width="match_parent"
-                android:layout_height="46dp"
+                android:layout_height="42dp"
                 android:layout_marginTop="14dp"
                 android:background="@drawable/bg_outline_button"
                 android:text="Update Trip Cover"
-                android:textColor="@color/brand_primary" />
+                android:textColor="@color/brand_secondary_dark" />
 
             <TextView
                 android:id="@+id/tvTripName"
@@ -163,8 +163,8 @@
             <Button
                 android:id="@+id/btnStartTrip"
                 android:layout_width="0dp"
-                android:layout_height="46dp"
-                android:layout_marginEnd="7dp"
+                android:layout_height="42dp"
+                android:layout_marginEnd="6dp"
                 android:layout_weight="1"
                 android:background="@drawable/bg_primary_button"
                 android:text="Start"
@@ -173,8 +173,8 @@
             <Button
                 android:id="@+id/btnCompleteTrip"
                 android:layout_width="0dp"
-                android:layout_height="46dp"
-                android:layout_marginStart="7dp"
+                android:layout_height="42dp"
+                android:layout_marginStart="6dp"
                 android:layout_weight="1"
                 android:background="@drawable/bg_warm_button"
                 android:text="Complete"
@@ -191,8 +191,8 @@
             <Button
                 android:id="@+id/btnCollaborators"
                 android:layout_width="0dp"
-                android:layout_height="46dp"
-                android:layout_marginEnd="7dp"
+                android:layout_height="42dp"
+                android:layout_marginEnd="6dp"
                 android:layout_weight="1"
                 android:background="@drawable/bg_secondary_button"
                 android:text="Trip Group"
@@ -201,19 +201,19 @@
             <Button
                 android:id="@+id/btnMyGroups"
                 android:layout_width="0dp"
-                android:layout_height="46dp"
-                android:layout_marginStart="7dp"
+                android:layout_height="42dp"
+                android:layout_marginStart="6dp"
                 android:layout_weight="1"
                 android:background="@drawable/bg_outline_button"
                 android:text="My Groups"
-                android:textColor="@color/brand_primary" />
+                android:textColor="@color/brand_secondary_dark" />
         </LinearLayout>
 
         <Button
             android:id="@+id/btnDeleteTrip"
             android:layout_width="match_parent"
-            android:layout_height="46dp"
-            android:layout_marginTop="12dp"
+            android:layout_height="42dp"
+            android:layout_marginTop="10dp"
             android:background="@drawable/bg_danger_button"
             android:text="Delete Trip"
             android:textColor="@color/text_on_brand" />
@@ -221,10 +221,10 @@
         <Button
             android:id="@+id/btnBack"
             android:layout_width="match_parent"
-            android:layout_height="46dp"
-            android:layout_marginTop="12dp"
+            android:layout_height="42dp"
+            android:layout_marginTop="10dp"
             android:background="@drawable/bg_outline_button"
             android:text="Back"
-            android:textColor="@color/brand_primary" />
+            android:textColor="@color/brand_secondary_dark" />
     </LinearLayout>
 </ScrollView>

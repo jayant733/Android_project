@@ -61,11 +61,11 @@
             <Button
                 android:id="@+id/btnSaveGroupName"
                 android:layout_width="match_parent"
-                android:layout_height="46dp"
+                android:layout_height="42dp"
                 android:layout_marginTop="12dp"
                 android:background="@drawable/bg_outline_button"
                 android:text="Save Group Name"
-                android:textColor="@color/brand_primary" />
+                android:textColor="@color/brand_secondary_dark" />
         </LinearLayout>
 
         <LinearLayout
@@ -119,7 +119,7 @@
             <Button
                 android:id="@+id/btnAddMember"
                 android:layout_width="match_parent"
-                android:layout_height="46dp"
+                android:layout_height="42dp"
                 android:layout_marginTop="14dp"
                 android:background="@drawable/bg_primary_button"
                 android:text="Send Invite"
@@ -185,7 +185,7 @@
             <Button
                 android:id="@+id/btnAddExpense"
                 android:layout_width="match_parent"
-                android:layout_height="46dp"
+                android:layout_height="42dp"
                 android:layout_marginTop="14dp"
                 android:background="@drawable/bg_primary_button"
                 android:text="Add Split Bill"
@@ -203,7 +203,7 @@
             <Button
                 android:id="@+id/btnCalculateSettlement"
                 android:layout_width="match_parent"
-                android:layout_height="46dp"
+                android:layout_height="42dp"
                 android:layout_marginTop="14dp"
                 android:background="@drawable/bg_secondary_button"
                 android:text="Calculate Settlement"
@@ -213,10 +213,10 @@
         <Button
             android:id="@+id/btnBackMembers"
             android:layout_width="match_parent"
-            android:layout_height="46dp"
-            android:layout_marginTop="16dp"
+            android:layout_height="42dp"
+            android:layout_marginTop="14dp"
             android:background="@drawable/bg_outline_button"
             android:text="Back"
-            android:textColor="@color/brand_primary" />
+            android:textColor="@color/brand_secondary_dark" />
     </LinearLayout>
 </ScrollView>
