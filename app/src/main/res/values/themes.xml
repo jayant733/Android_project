@@ -18,6 +18,8 @@
     </style>
 
     <style name="Widget.TripSync.Button" parent="@android:style/Widget.Button">
+        <item name="android:backgroundTint">@null</item>
+        <item name="backgroundTint">@null</item>
         <item name="android:minHeight">44dp</item>
         <item name="android:minWidth">0dp</item>
         <item name="android:paddingLeft">16dp</item>
