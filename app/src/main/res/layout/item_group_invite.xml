@@ -60,6 +60,6 @@
             android:layout_weight="1"
             android:background="@drawable/bg_outline_button"
             android:text="Decline"
-            android:textColor="@color/brand_primary" />
+            android:textColor="@color/text_on_brand" />
     </LinearLayout>
 </LinearLayout>

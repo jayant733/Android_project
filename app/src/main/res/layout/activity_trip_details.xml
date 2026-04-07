@@ -33,7 +33,7 @@
                 android:layout_marginTop="14dp"
                 android:background="@drawable/bg_outline_button"
                 android:text="Update Trip Cover"
-                android:textColor="@color/brand_secondary_dark" />
+                android:textColor="@color/text_on_brand" />
 
             <TextView
                 android:id="@+id/tvTripName"
@@ -206,7 +206,7 @@
                 android:layout_weight="1"
                 android:background="@drawable/bg_outline_button"
                 android:text="My Groups"
-                android:textColor="@color/brand_secondary_dark" />
+                android:textColor="@color/text_on_brand" />
         </LinearLayout>
 
         <Button
@@ -225,6 +225,6 @@
             android:layout_marginTop="10dp"
             android:background="@drawable/bg_outline_button"
             android:text="Back"
-            android:textColor="@color/brand_secondary_dark" />
+            android:textColor="@color/text_on_brand" />
     </LinearLayout>
 </ScrollView>

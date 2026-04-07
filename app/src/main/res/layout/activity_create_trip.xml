@@ -70,7 +70,7 @@
                 android:layout_marginTop="16dp"
                 android:background="@drawable/bg_outline_button"
                 android:text="Select Trip Cover Image"
-                android:textColor="@color/brand_secondary_dark" />
+                android:textColor="@color/text_on_brand" />
 
             <EditText
                 android:id="@+id/etTripName"
@@ -156,7 +156,7 @@
                 android:layout_marginTop="10dp"
                 android:background="@drawable/bg_outline_button"
                 android:text="Back"
-                android:textColor="@color/brand_secondary_dark" />
+                android:textColor="@color/text_on_brand" />
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

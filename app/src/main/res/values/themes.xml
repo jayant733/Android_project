@@ -5,8 +5,8 @@
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:navigationBarColor">@color/surface_bottom</item>
         <item name="android:buttonStyle">@style/Widget.TripSync.Button</item>
-        <item name="colorPrimary">@color/brand_primary</item>
-        <item name="colorPrimaryContainer">@color/chip_blue</item>
+        <item name="colorPrimary">@color/brand_secondary</item>
+        <item name="colorPrimaryContainer">@color/chip_teal</item>
         <item name="colorSecondary">@color/brand_secondary</item>
         <item name="colorTertiary">@color/brand_accent</item>
         <item name="colorSurface">@color/surface_base</item>

@@ -120,6 +120,6 @@
             android:layout_marginTop="16dp"
             android:background="@drawable/bg_outline_button"
             android:text="Back"
-            android:textColor="@color/brand_primary" />
+            android:textColor="@color/text_on_brand" />
     </LinearLayout>
 </ScrollView>

@@ -3,14 +3,17 @@
         <shape>
             <stroke android:width="1.5dp" android:color="@color/brand_secondary"/>
             <corners android:radius="14dp"/>
-            <solid android:color="#E9FBF7"/>
+            <solid android:color="#149B8D"/>
         </shape>
     </item>
     <item>
         <shape>
-            <stroke android:width="1.5dp" android:color="#8FDCCF"/>
+            <stroke android:width="1.5dp" android:color="#1EFFFFFF"/>
             <corners android:radius="14dp"/>
-            <solid android:color="#F5FFFD"/>
+            <gradient
+                android:angle="315"
+                android:startColor="#6FE7D7"
+                android:endColor="#1AAE9D" />
         </shape>
     </item>
 </selector>
